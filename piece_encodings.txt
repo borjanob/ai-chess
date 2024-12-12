@@ -1,0 +1,25 @@
+GRID POCNUVA OD DOLU LEVO SO [0][0]
+PIECE ENCODINGS:
+piece: encoding
+
+Board starts at bottom-left - [0][0]
+White always starts at rows 0 and 1
+Black always starts at rows 6 and 7
+
+---BELI---:
+
+piun = 13
+konj = 14
+lovec = 15
+top = 16
+kralica = 17
+kral = 18
+
+--CRNI--:
+
+piun = 7
+konj = 8
+lovec = 9
+top = 10
+kralica = 11
+kral = 12
