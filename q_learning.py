@@ -63,8 +63,10 @@ class DQN:
 
             # SELECT RANDOM MOVE UNTIL WE GET A VALID RADOM MOVE FROM ACTION MASK
             is_valid_action = False
-            while(is_valid_action == False):
+            exit_counter = 0
+            while(is_valid_action == False and exit_counter<=1000):
                 action_number = np.random.randint(0, self.num_actions)
+                exit_counter +=1
                 if action_mask[action_number] == 1:
                     is_valid_action = True
 
@@ -197,8 +199,11 @@ class DDQN:
 
             # SELECT RANDOM MOVE UNTIL WE GET A VALID RADOM MOVE FROM ACTION MASK
             is_valid_action = False
-            while(is_valid_action == False):
+            # safety so loop doesnt get stuck
+            exit_counter = 0
+            while(is_valid_action == False and exit_counter<=1000):
                 action_number = np.random.randint(0, self.num_actions)
+                exit_counter += 1
                 if action_mask[action_number] == 1:
                     is_valid_action = True
                     
@@ -410,7 +415,7 @@ class DuelingDQN:
 
 
 class DDPG:
-    def __init__(self, state_space_shape, action_space_shape,actor_model, critic_model,use_custom_models = True, learning_rate_actor=0.1, learning_rate_critic=0.1,
+    def __init__(self, state_space_shape, action_space_shape,num_of_actions,actor_model, critic_model,use_custom_models = True, learning_rate_actor=0.1, learning_rate_critic=0.1,
                  discount_factor=0.95, batch_size=16, memory_size=100):
         """
         Initializes Actor Critic (Deep Deterministic Policy Gradient) agent.
@@ -428,6 +433,7 @@ class DDPG:
         self.learning_rate_critic = learning_rate_critic
         self.discount_factor = discount_factor
         self.batch_size = batch_size
+        self.num_of_actions = num_of_actions
         self.memory = deque(maxlen=memory_size)
         self.build_model(actor_model,critic_model,use_custom_models)
 
@@ -520,11 +526,16 @@ class DDPG:
         :return:
         """
         probability = np.random.random()
+
+
         if probability < epsilon:
 
             valid_action = False
-            while(valid_action == False):
-                action_number = np.random.randint(0, self.action_space_shape)
+            # safety so loop doesnt get stuck
+            exit_counter = 0
+            while(valid_action == False and exit_counter <= 1000):
+                action_number = np.random.randint(0, self.num_of_actions)
+                exit_counter +=1
                 if legal_moves[action_number] == 1:
                     valid_action = True
             return action_number

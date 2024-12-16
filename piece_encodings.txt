@@ -5,6 +5,9 @@ piece: encoding
 Board starts at bottom-left - [0][0]
 White always starts at rows 0 and 1
 Black always starts at rows 6 and 7
+reward for win = 100
+reward for loss = -100
+reward for illegal action = -50
 
 ---BELI---:
 

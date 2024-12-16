@@ -9,8 +9,9 @@ import numpy as np
 from cnn_model import CNN
 from tensorflow.keras.models import Model 
 from pettingzoo import AECEnv
-from utils import play_training_tournament
+from utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces
 from piece_encodings import *
+
 # SEGDE IMAS SMENETO WEIGHTS DA NE SE UPDATE NA POCETOK 
 # VO ALGORITMITE OD Q_LEARNING.PY
 # SMENA I VO DDPG ZA DA IMA UBAV SHAPE I DODADE FLATTEN
@@ -25,9 +26,20 @@ from piece_encodings import *
 # SREDI GO DA SE NAMALAT NA TOCNIO BROJ AKCII
 # -----DONE-----
 
-# TODO: DOPRAJ GO TUURNAMENT LOOP ZA TRAIN MODEL
-
+# -----DONE-----
 # TODO: update reward system
+# -----DONE-----
+
+# -----DONE-----
+# TODO: ZA PLAYER1 AKO NAPRAJ ILLEGAL SAMO DA PRAJ EXIT, A PLAYER 0 AKO NAPRAJ ILLEGAL DA MU DAVA NEGATIVE REWARD
+# -----DONE-----
+
+# TODO: FIX TRAIN CALL ON A2C
+
+# TODO: KO KE SE NAPRAJ ILLEGAL MOVE DA POBEDI DRUGIO A NE TOJ SO E NA RED
+
+
+# TODO: DOPRAJ GO TUURNAMENT LOOP ZA TRAIN MODEL
 
 # TODO: fix weight update on train function call
 
@@ -37,77 +49,47 @@ env.reset(seed=42)
 number_of_actions = env.action_space('player_1').n
 observation_space_size = env.observation_space('player_1')['observation'].shape[2]
 
+
+cnn_model_initial = CNN(number_of_actions,128,1)
+cnn_model_initial.compile(Adam(0.01),loss=MeanSquaredError())
+
+
 cnn_model = CNN(number_of_actions,128,1)
 cnn_model.compile(Adam(0.01),loss=MeanSquaredError())
 
-player_model = DQN((8,8,111),number_of_actions,cnn_model,cnn_model)
+cnn_model_opp1 = CNN(number_of_actions,128,1)
+cnn_model_opp1.compile(Adam(0.01),loss=MeanSquaredError())
 
-opp_1 = DDQN((8,8,111),number_of_actions,cnn_model,cnn_model)
-opp_2 = DQN((8,8,111),number_of_actions,cnn_model,cnn_model)
 
-opp_3 = DDPG((8,8,111),(1,),cnn_model, cnn_model)
+cnn_model_opp2 = CNN(number_of_actions,128,1)
+cnn_model_opp2.compile(Adam(0.01),loss=MeanSquaredError())
 
-opponents = [opp_3,opp_2,opp_1]
+cnn_model_opp3 = CNN(number_of_actions,128,1)
+cnn_model_opp3.compile(Adam(0.01),loss=MeanSquaredError())
+
+
+
+player_model = DQN((8,8,111),number_of_actions,cnn_model,cnn_model,batch_size=32)
+
+opp_3 = DDQN((8,8,111),number_of_actions,cnn_model_opp1,cnn_model_opp1)
+opp_2 = DQN((8,8,111),number_of_actions,cnn_model_opp2,cnn_model_opp2)
+
+#player_model = DDPG((8,8,111),(1,),number_of_actions,cnn_model_opp3, cnn_model_opp3)
+
+opponents = [opp_2,opp_3]
 
 wins = dict()
 matches_played = 0
 
-#trained_model, wins, round_counter, match_couner = play_training_tournament(player_model,opponents,env,2,1)
 
-def check_dumbass(state) -> bool:
-
-    for row in range(8):
-        print('==================')
-        for col in range(8):
-            
-            for i in range(111):
-
-                if i>6 and i<19 and state[row][col][i] == True:
-                    
-                    print(f'True at: row = {row}, col = {col}, index = {i}')
-
-
-def count_pieces(state, encodings_by_value : dict):
-
-    piece_count = 0
-    pieces_by_type = dict()
-    print('=== COUNTING PIECES ===')
-
-    for row in range(8):
-
-        for col in range(8):
-
-            for i in range(111):
-                
-                 if i in encodings_by_value and state[row][col][i] == True:
-                        
-                    #print(f'Piece at: row = {row}, col = {col}, index = {i}')
-                    piece_count += 1
-
-                    piece_name = encodings_by_value[i]
-
-                    if piece_name not in pieces_by_type:
-                        pieces_by_type[piece_name] = 1
-                    else:
-                        pieces_by_type[piece_name] +=1
-
-    return piece_count,pieces_by_type
-
-
-def calculate_reward(previous_piece_nums : dict, piece_nums_current : dict, rewards_by_piece: dict) -> int:
-    
-    for key in previous_piece_nums.keys():
-        value = previous_piece_nums[key]
-        if piece_nums_current[key] != value:
-            reward = rewards_by_piece[key]
-            return reward
-    
-    return -1
-
+avg_rewards = []
 
 for opponent in opponents:
-
-    for match in range(5):
+    print('================')
+    print(f'Playing against {opponent.__class__.__name__}')
+    print('================')
+    
+    for match in range(3):
 
         env.reset()
         previous_number_of_pieces = 32
@@ -116,26 +98,18 @@ for opponent in opponents:
         pieces_by_type_previous = piece_nums
         initial_state = True
 
-
-        # OBRATEN AGENT DAVA ZA WIN
         for agent in env.agent_iter():
-
+            
+            print(f'{agent} making a move')
             piece_taken_in_move = False
             observation, reward, termination, truncation, info = env.last()
             state = observation['observation']
             
-            # if termination or truncation:
-                
-            #     if agent not in wins:
-            #         wins[agent] = 1
-            #     else:
-            #         wins[agent] +=1
-
-            #     print(f'WINNER: {agent}')
-            #     break
-            # else:
-
             moves = observation["action_mask"]             
+
+            if max(moves) == 0:
+                print('No legal moves left')
+                break
 
             expanded_state = np.expand_dims(state, axis = 0)
             converted_state = np.array(expanded_state, dtype=float)
@@ -146,14 +120,34 @@ for opponent in opponents:
                 else:
                         action = opponent.get_action(converted_state,0.01,moves)
             else:
-                    action = player_model.get_action(converted_state,0.01,moves)
+                if isinstance(player_model, DDPG):
+                        action = player_model.get_action(converted_state,0.01, discrete=True, legal_moves=moves)
+                else:
+                        action = player_model.get_action(converted_state,0.01,moves)
 
-            #TAKE ACTION
+
             env.step(action)
 
             new_observation, reward, termination, truncation, info = env.last()
 
             new_state = new_observation['observation']
+            
+
+            # illegal move made
+            if moves[action] == 0:
+                
+                if agent == 'player_0':
+
+                    # give negative reward to model being trained for illegal moves
+                    reward = -50
+                    player_model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                    wins['player_1'] += 1
+                else:
+                     wins['player_0'] += 1
+
+                break
+                     
+
 
             number_of_pieces_on_board, pieces_by_type = count_pieces(new_state,piece_encodings_by_number)
 
@@ -165,19 +159,23 @@ for opponent in opponents:
                 initial_state = False
 
             if agent == 'player_0':
-            
+                
                 if piece_taken_in_move and termination == False:
                     reward = calculate_reward(pieces_by_type_previous,pieces_by_type, rewards_by_piece)
 
                 if termination:
                     reward = 100
-                
-                print('REWARD IS {reward}')
+                if reward > 0:
+                    print(f'REWARD IS {reward}')
+
                 # update model memory after every move
                 player_model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
             
-             
-                
+            if agent == 'player_1' and termination:
+                reward = -100
+                # give negative reward on loss
+                player_model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+            
             
             if termination or truncation:
                 
@@ -197,10 +195,13 @@ for opponent in opponents:
         print('match finished')
         matches_played+=1
 
-        if match % 2 == 0:
+        if match % 1 == 0:
             print('Training model and updating weights')
             player_model.train()
 
 print(wins)
 print(matches_played)
+
+# wins = play_vs_random(env,player_model,10)
+# print(wins)
 env.close()
