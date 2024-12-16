@@ -49,7 +49,7 @@ class DQN:
         """
         self.target_model.set_weights(self.model.get_weights())
 
-    def get_action(self, state, epsilon, action_mask):
+    def get_action(self, state, epsilon, action_mask, explore= True):
         """
         Returns the best action following epsilon greedy policy for the current state.
         :param state: current state
@@ -59,7 +59,7 @@ class DQN:
         probability = np.random.random() + epsilon / self.num_actions
 
         # AKO E EXPLORATION
-        if probability < epsilon:
+        if probability < epsilon and explore:
 
             # SELECT RANDOM MOVE UNTIL WE GET A VALID RADOM MOVE FROM ACTION MASK
             is_valid_action = False
@@ -568,7 +568,7 @@ class DDPG:
                 state = state.reshape(1, self.state_space_shape)
             return self.actor.predict(state)[0]
 
-    def get_action(self, state, epsilon=0, discrete=True, legal_moves = None):
+    def get_action(self, state, epsilon=0, legal_moves = None, discrete=True):
         """
         Returns the best action following epsilon greedy policy for the current state.
         :param state: current state
@@ -612,7 +612,7 @@ class DDPG:
         next_state = [mb[3] for mb in minibatch]
         done = [mb[4] for mb in minibatch]
 
-        states = convert_to_tensor(state, dtype=float32)
+        states = convert_to_tensor(state, dtype=np.float32)
         actions = convert_to_tensor(action, dtype=float32)
         rewards = convert_to_tensor(reward, dtype=float32)
         next_states = convert_to_tensor(next_state, dtype=float32)

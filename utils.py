@@ -9,6 +9,7 @@ import numpy as np
 from cnn_model import CNN
 from tensorflow.keras.models import Model 
 from pettingzoo import AECEnv
+from piece_encodings import * 
 
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
     env.reset()
@@ -30,7 +31,7 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
             converted_state = np.array(expanded_state, dtype=float)
 
             if agent == 'player_1':
-                pass
+                action = env.action_space(agent).sample(moves)
             else:
                 action = model.get_action(converted_state,0.01,moves)
 
@@ -51,76 +52,161 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
     return wins
 
 
+def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
+        rounds_in_tournament: int = 5, add_random_opponents: bool = True ):
+    
+    for round in range(rounds_in_tournament):
+        updated_models = []
+        print('===============')
+        print(f'Round {round}: ')
 
-def play_training_tournament(model_to_train: Model, opponents: list[Model], env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5, add_random_opponent: bool = True    ) -> dict:
+        for model_to_train in models:
+            
+            print('===============')
+            print(f'{model_to_train.__class__.__name__} being trained')
+            print('===============')
+
+            opponents = [ x for x in models if x != model_to_train]
+
+            trained_model, wins_data = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent,add_random_opponents)
+
+            updated_models.append(trained_model)
+            
+ 
+            print(f'Stats after training {wins_data}')
+
+            
+        models = updated_models
+
+    return models
+
+
+
+
+def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: chess_v6, matches_per_opponent: int = 10,
+                add_random_opponent: bool = True    ) -> dict:
     
     wins = dict()
-    matches_played = 0
-    rounds_played = 0
 
-    for round in range(rounds_in_tournament):
-            
-        for opponent in opponents:
+    if add_random_opponent:
+        opponents.append('random')
 
-            for match in range(matches_per_opponent):
+    
+    for opponent in opponents:
+        print('================')
+        print(f'Playing against {opponent.__class__.__name__}')
+        print('================')
+        
+        for match in range(matches_per_opponent):
 
-                # reset env before every game
-                env.reset()
+            env.reset()
+            previous_number_of_pieces = 32
 
-                for agent in env.agent_iter():
+            # from piece_encodings.py
+            pieces_by_type_previous = piece_nums
+            initial_state = True
 
-                    observation, reward, termination, truncation, info = env.last()
-                    state = observation['observation']
+            for agent in env.agent_iter():
+                
+                print(f'{agent} making a move')
+                piece_taken_in_move = False
+                observation, reward, termination, truncation, info = env.last()
+                state = observation['observation']
+                
+                moves = observation["action_mask"]             
 
-                    if termination or truncation:
-                        action = None
+                if max(moves) == 0:
+                    print('No legal moves left')
+                    break
 
-                        if agent not in wins:
-                            wins[agent] = 1
-                        else:
-                            wins[agent] +=1
+                expanded_state = np.expand_dims(state, axis = 0)
+                converted_state = np.array(expanded_state, dtype=float)
 
-                        break
+                if agent == 'player_1':
+                    
+                    if opponent == 'random':
+                        action = env.action_space(agent).sample(moves)
                     else:
+                            action = opponent.get_action(converted_state,0.01,moves)
 
-                        moves = observation["action_mask"]             
-                        # this is where you would insert your policy
-                        expanded_state = np.expand_dims(state, axis = 0)
-                        converted_state = np.array(expanded_state, dtype=float)
+                else:
+                    action = model_to_train.get_action(converted_state,0.01,moves)
 
-                        if agent == 'player_1':
-                            if isinstance(opponent, DDPG):
-                                action = opponent.get_action(converted_state,0.01, discrete=True, legal_moves=moves)
-                            else:
-                                action = opponent.get_action(converted_state,0.01,moves)
-                        else:
-                            
-                            # predictions = model.predict(test)
-                            action = model_to_train.get_action(converted_state,0.01,moves)
-                            
-                    env.step(action)
 
+                env.step(action)
+
+                new_observation, reward, termination, truncation, info = env.last()
+
+                new_state = new_observation['observation']
+                
+
+                # illegal move made
+                if moves[action] == 0:
+                    
                     if agent == 'player_0':
-                        new_observation, reward, termination, truncation, info = env.last()
-                        new_state = new_observation['observation']
 
-                        # update model memory after every move
+                        # give negative reward to model being trained for illegal moves
+                        reward = -50
                         model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                        #wins['player_1'] += 1
+                    # else:
+                    #      wins['player_0'] += 1
+
+                    break
+                        
+
+
+                number_of_pieces_on_board, pieces_by_type = count_pieces(new_state,piece_encodings_by_number)
+
+                if number_of_pieces_on_board != previous_number_of_pieces and initial_state == False:
+                    piece_taken_in_move = True
+                
+
+                if initial_state:
+                    initial_state = False
+
+                if agent == 'player_0':
                     
+                    if piece_taken_in_move and termination == False:
+                        reward = calculate_reward(pieces_by_type_previous,pieces_by_type, rewards_by_piece)
+
+                    if termination:
+                        reward = 100
+                    if reward > 0:
+                        print(f'REWARD IS {reward}')
+
+                    # update model memory after every move
+                    model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                
+                if agent == 'player_1' and termination:
+                    reward = -100
+                    # give negative reward on loss
+                    model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                
+                
+                if termination or truncation:
                     
-                        if match % 2 == 0:
-                            print('Training model and updating weights')
-                            model_to_train.train()
-                    
+                    if agent not in wins:
+                        wins[agent] = 1
+                    else:
+                        wins[agent] +=1
 
+                    print(f'WINNER: {agent}')
+                    break
+                
+                # set previous board state to equal current state after change
+                if piece_taken_in_move:
+                    previous_number_of_pieces = number_of_pieces_on_board
+                    pieces_by_type_previous = pieces_by_type
+                
+            print('match finished')
+            model_to_train.train()
+            if match % 5 == 0:
+                print('Training model and updating weights')
+                model_to_train.update_target_model()
+    
 
-                print('match finished')
-                matches_played+=1
-
-        rounds_played += 1
-
-    return model_to_train, wins, rounds_played, matches_played
+    return model_to_train, wins
 
 
 

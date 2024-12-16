@@ -34,14 +34,20 @@ from piece_encodings import *
 # TODO: ZA PLAYER1 AKO NAPRAJ ILLEGAL SAMO DA PRAJ EXIT, A PLAYER 0 AKO NAPRAJ ILLEGAL DA MU DAVA NEGATIVE REWARD
 # -----DONE-----
 
+# TODO: smeni za train i update target model
+
 # TODO: FIX TRAIN CALL ON A2C
 
 # TODO: KO KE SE NAPRAJ ILLEGAL MOVE DA POBEDI DRUGIO A NE TOJ SO E NA RED
 
-
+# -----DONE-----
 # TODO: DOPRAJ GO TUURNAMENT LOOP ZA TRAIN MODEL
+# -----DONE-----
 
-# TODO: fix weight update on train function call
+# vidi za so se koristi target model
+# odi na kons da vidis za DDPG kako e kodo napisan da ti objasni zosto te ebava
+# dali treba razlicna arhitektura na model za sekoj algoritam
+
 
 env = chess_v6.env(render_mode="human")
 env.reset(seed=42)
@@ -67,14 +73,12 @@ cnn_model_opp2.compile(Adam(0.01),loss=MeanSquaredError())
 cnn_model_opp3 = CNN(number_of_actions,128,1)
 cnn_model_opp3.compile(Adam(0.01),loss=MeanSquaredError())
 
-
-
-player_model = DQN((8,8,111),number_of_actions,cnn_model,cnn_model,batch_size=32)
+#player_model = DQN((8,8,111),number_of_actions,cnn_model,cnn_model,batch_size=32)
 
 opp_3 = DDQN((8,8,111),number_of_actions,cnn_model_opp1,cnn_model_opp1)
 opp_2 = DQN((8,8,111),number_of_actions,cnn_model_opp2,cnn_model_opp2)
 
-#player_model = DDPG((8,8,111),(1,),number_of_actions,cnn_model_opp3, cnn_model_opp3)
+player_model = DDPG((8,8,111),(1,),number_of_actions,cnn_model_opp3, cnn_model_opp3)
 
 opponents = [opp_2,opp_3]
 
@@ -83,6 +87,12 @@ matches_played = 0
 
 
 avg_rewards = []
+
+
+models = [opp_2,opp_3,player_model]
+
+testing = play_training_tournament(models,env,1,1)
+
 
 for opponent in opponents:
     print('================')
@@ -141,9 +151,9 @@ for opponent in opponents:
                     # give negative reward to model being trained for illegal moves
                     reward = -50
                     player_model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
-                    wins['player_1'] += 1
-                else:
-                     wins['player_0'] += 1
+                    #wins['player_1'] += 1
+                # else:
+                #      wins['player_0'] += 1
 
                 break
                      
@@ -194,10 +204,11 @@ for opponent in opponents:
             
         print('match finished')
         matches_played+=1
+        player_model.train()
 
         if match % 1 == 0:
             print('Training model and updating weights')
-            player_model.train()
+            player_model.update_target_model()
 
 print(wins)
 print(matches_played)
