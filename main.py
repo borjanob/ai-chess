@@ -45,7 +45,11 @@ from piece_encodings import *
 # -----DONE-----
 
 # vidi za so se koristi target model
+# TODO: za konsultacii so da prasas
 # odi na kons da vidis za DDPG kako e kodo napisan da ti objasni zosto te ebava
+# zosto ima suqeeze vo gradientape 
+# dali ti trebat tebe kako touple ili mozis samo da gi pustis inputs deka output shape ti e fixiran vo CNN klasata
+# kako mozis da gi pustis site od cel batch naednas vo DDPG
 # dali treba razlicna arhitektura na model za sekoj algoritam
 
 
@@ -91,7 +95,7 @@ avg_rewards = []
 
 models = [opp_2,opp_3,player_model]
 
-testing = play_training_tournament(models,env,1,1)
+#testing = play_training_tournament(models,env,1,1)
 
 
 for opponent in opponents:

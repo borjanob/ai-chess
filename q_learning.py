@@ -606,22 +606,27 @@ class DDPG:
         batch_size = min(self.batch_size, len(self.memory))
         minibatch = random.sample(self.memory, batch_size)
 
-        state = [mb[0] for mb in minibatch]
-        action = [mb[1] for mb in minibatch]
-        reward = [mb[2] for mb in minibatch]
-        next_state = [mb[3] for mb in minibatch]
-        done = [mb[4] for mb in minibatch]
+        state = np.array([mb[0] for mb in minibatch], dtype=np.float32)
+        action = np.array([mb[1] for mb in minibatch], dtype=np.float32)
+        reward = np.array([mb[2] for mb in minibatch], dtype=np.float32)
+        next_state = np.array([mb[3] for mb in minibatch], dtype=np.float32)
+        done = np.array([mb[4] for mb in minibatch], dtype=np.float32)
 
-        states = convert_to_tensor(state, dtype=np.float32)
+        states = convert_to_tensor(state, dtype=tensorflow.float32)
         actions = convert_to_tensor(action, dtype=float32)
         rewards = convert_to_tensor(reward, dtype=float32)
         next_states = convert_to_tensor(next_state, dtype=float32)
         dones = convert_to_tensor(done, dtype=float32)
 
         with GradientTape() as tape:
+            # target_actions = self.target_actor(next_states)
+            # critic_value_ = squeeze(self.target_critic([next_states, target_actions]), 1)
+            # critic_value = squeeze(self.critic([states, actions]), 1)
+            # target = rewards + self.discount_factor * critic_value_ * (1 - dones)
+            # critic_loss = MSE(target, critic_value)
             target_actions = self.target_actor(next_states)
-            critic_value_ = squeeze(self.target_critic([next_states, target_actions]), 1)
-            critic_value = squeeze(self.critic([states, actions]), 1)
+            critic_value_ = self.target_critic(next_states)
+            critic_value = self.critic(states)
             target = rewards + self.discount_factor * critic_value_ * (1 - dones)
             critic_loss = MSE(target, critic_value)
 

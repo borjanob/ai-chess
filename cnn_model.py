@@ -7,7 +7,15 @@ from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, Gradien
 
 class CNN(Model):
 
-    def __init__(self,number_of_outputs,number_of_hidden_units,input_shape):
+    """
+    Defines a class for the actors used in reinforcement leraning where the states are represented as a 2-D image
+
+    params:
+    number_of_outputs: the number of outputs the neural net should return
+    number_of_hidden_units: the number of hidden units in the neural net
+    """
+
+    def __init__(self,number_of_outputs,number_of_hidden_units):
         super(CNN,self).__init__()
 
         self.first_block = Sequential(
