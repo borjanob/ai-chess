@@ -12,47 +12,6 @@ from pettingzoo import AECEnv
 from utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces
 from piece_encodings import *
 
-# SEGDE IMAS SMENETO WEIGHTS DA NE SE UPDATE NA POCETOK 
-# VO ALGORITMITE OD Q_LEARNING.PY
-# SMENA I VO DDPG ZA DA IMA UBAV SHAPE I DODADE FLATTEN
-
-# -----DONE-----
-# TODO: DODAJ GI I VO DDPG DA ZEMA AKCIJA SAMO OD DOZVOLENITE 
-# KAKO SO IMAS I VO DRUGITE ALGORTIMI SO MNOZENJE NA ACTION MASK 
-# -----DONE-----
-
-# -----DONE-----
-# TODO: VO ACTOR-CRITIC ALGORITMO VRAKA 8*8*num_of_actions AKCII VO PREDICT
-# SREDI GO DA SE NAMALAT NA TOCNIO BROJ AKCII
-# -----DONE-----
-
-# -----DONE-----
-# TODO: update reward system
-# -----DONE-----
-
-# -----DONE-----
-# TODO: ZA PLAYER1 AKO NAPRAJ ILLEGAL SAMO DA PRAJ EXIT, A PLAYER 0 AKO NAPRAJ ILLEGAL DA MU DAVA NEGATIVE REWARD
-# -----DONE-----
-
-# TODO: smeni za train i update target model
-
-# TODO: FIX TRAIN CALL ON A2C
-
-# TODO: KO KE SE NAPRAJ ILLEGAL MOVE DA POBEDI DRUGIO A NE TOJ SO E NA RED
-
-# -----DONE-----
-# TODO: DOPRAJ GO TUURNAMENT LOOP ZA TRAIN MODEL
-# -----DONE-----
-
-# vidi za so se koristi target model
-# TODO: za konsultacii so da prasas
-# odi na kons da vidis za DDPG kako e kodo napisan da ti objasni zosto te ebava
-# zosto ima suqeeze vo gradientape 
-# dali ti trebat tebe kako touple ili mozis samo da gi pustis inputs deka output shape ti e fixiran vo CNN klasata
-# kako mozis da gi pustis site od cel batch naednas vo DDPG
-# dali treba razlicna arhitektura na model za sekoj algoritam
-
-
 env = chess_v6.env(render_mode="human")
 env.reset(seed=42)
 
