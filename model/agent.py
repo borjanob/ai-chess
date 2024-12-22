@@ -3,9 +3,10 @@ from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError, MSE
 from tensorflow.keras import Model
+from tensorflow.nn import softmax
 from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
 
-class CNN(Model):
+class Agent(Model):
 
     """
     Defines a class for the actors used in reinforcement leraning where the states are represented as a 2-D image
@@ -16,7 +17,7 @@ class CNN(Model):
     """
 
     def __init__(self,number_of_outputs,number_of_hidden_units):
-        super(CNN,self).__init__()
+        super(Agent,self).__init__()
 
         self.first_block = Sequential(
             [
@@ -44,15 +45,6 @@ class CNN(Model):
             ]
         )
 
-    #     model = Sequential()
-    #     model.add(Conv2D(32, 3, activation='relu',data_format = 'channels_last'))
-    #     model.add(Dense(32,activation = 'relu'))
-    #     model.add(Dense(16,activation = 'relu'))
-    #     model.add(Dense(16,activation = 'relu'))
-    #     model.add(Flatten())
-    #     model.add(Dense(number_of_actions,activation='linear'))
-    #     model.compile(Adam(0.01),loss=MeanSquaredError)
-
         self.prediction_block = Sequential(
 
             [
@@ -60,6 +52,8 @@ class CNN(Model):
                 Dense(128,activation = 'relu'),
                 #Dropout(0.25),
                 Dense(64,activation = 'relu'),
+
+                
                 Dense(number_of_outputs, activation = 'linear')
             ]
         )
@@ -68,11 +62,12 @@ class CNN(Model):
 
         self.dropout = Dropout(0.25)
 
-
     def call(self,data):
         x = self.first_block(data)
         x = self.second_block(x)
         x = self.third_block(x)
         x = self.prediction_block(x)
+
+        #output probabilities
+        #x = softmax(x)
         return x
-    

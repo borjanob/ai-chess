@@ -1,17 +1,25 @@
 from pettingzoo.classic import chess_v6
-from q_learning import DQN, DDPG, DDQN
-from tensorflow.keras.layers import Input, Dense, Concatenate, Conv2D, Flatten
-from tensorflow.keras.models import Model,Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
 import numpy as np
-from cnn_model import CNN
+from model.agent import Agent
 from tensorflow.keras.models import Model 
 from pettingzoo import AECEnv
-from piece_encodings import * 
+from utils.piece_encodings_full import * 
+
+def adapt_game_state(current_state: [bool]) -> [bool]:
+
+    """
+    Changes the state of the game to a smaller version better suited for training
+    """
+
+    pass
 
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
+
+
+    """
+    Plays an :number_of_games episodes of env against random actions
+    """
+
     env.reset()
     wins = dict()
 
@@ -53,8 +61,13 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
 
 def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5, add_random_opponents: bool = True ):
+        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True ):
     
+
+    """
+    Defines :models playing against each other in a tournament setting
+    """
+
     for round in range(rounds_in_tournament):
         updated_models = []
         print('===============')
@@ -68,24 +81,25 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
 
             opponents = [ x for x in models if x != model_to_train]
 
-            trained_model, wins_data = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent,add_random_opponents)
+            trained_model, wins_data = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
 
             updated_models.append(trained_model)
-            
- 
+        
             print(f'Stats after training {wins_data}')
-
             
         models = updated_models
 
     return models
 
 
-
-
 def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: chess_v6, matches_per_opponent: int = 10,
-                add_random_opponent: bool = True    ) -> dict:
+            episodes_for_target_update: int = 5, add_random_opponent: bool = True    ) -> dict:
     
+
+    """"
+    Plays one round of matches in a tournament setting
+    """
+
     wins = dict()
 
     if add_random_opponent:
@@ -199,10 +213,11 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
                     previous_number_of_pieces = number_of_pieces_on_board
                     pieces_by_type_previous = pieces_by_type
                 
-            print('match finished')
+            #print('match finished')
             model_to_train.train()
-            if match % 5 == 0:
-                print('Training model and updating weights')
+
+            if match % episodes_for_target_update == 0:
+                print('Updating target model')
                 model_to_train.update_target_model()
     
 
@@ -224,6 +239,11 @@ def check_dumbass(state) -> bool:
 
 
 def count_pieces(state, encodings_by_value : dict):
+
+
+    """
+    Count number of pieces  and piece types on the board
+    """
 
     piece_count = 0
     pieces_by_type = dict()
@@ -260,6 +280,10 @@ def count_pieces(state, encodings_by_value : dict):
 
 
 def calculate_reward(previous_piece_nums : dict, piece_nums_current : dict, rewards_by_piece: dict) -> int:
+
+    """
+    Calculate reward to give to agent on action
+    """
     
     for key in previous_piece_nums.keys():
         value = previous_piece_nums[key]
