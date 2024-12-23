@@ -1,13 +1,10 @@
 from pettingzoo.classic import chess_v6
 from utils.q_learning import DQN, DDPG, DDQN
-from tensorflow.keras.layers import Input, Dense, Concatenate, Conv2D, Flatten
-from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError, MSE
 from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
 import numpy as np
 from model.agent import Agent
-from tensorflow.keras.models import Model 
 from pettingzoo import AECEnv
 from utils.utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces
 from utils.piece_encodings_full import *
@@ -18,32 +15,22 @@ env.reset(seed=42)
 number_of_actions = env.action_space('player_1').n
 observation_space_size = env.observation_space('player_1')['observation'].shape[2]
 
+model_1_model = Agent(number_of_actions,128)
+model_1_model.compile(Adam(0.01),loss=MeanSquaredError())
 
-cnn_model_initial = Agent(number_of_actions,128)
-cnn_model_initial.compile(Adam(0.01),loss=MeanSquaredError())
-
-
-cnn_model = Agent(number_of_actions,128)
-cnn_model.compile(Adam(0.01),loss=MeanSquaredError())
-
-cnn_model_opp1 = Agent(number_of_actions,128)
-cnn_model_opp1.compile(Adam(0.01),loss=MeanSquaredError())
+model_1_target = Agent(number_of_actions,128)
+model_1_target.compile(Adam(0.01),loss=MeanSquaredError())
 
 
-cnn_model_opp2 = Agent(number_of_actions,128)
-cnn_model_opp2.compile(Adam(0.01),loss=MeanSquaredError())
+model_1 = DQN((8,8,111),number_of_actions,model_1_model,model_1_target,batch_size=32)
 
-cnn_model_opp3 = Agent(number_of_actions,128)
-cnn_model_opp3.compile(Adam(0.01),loss=MeanSquaredError())
+model_2_model = Agent(number_of_actions,128)
+model_2_model.compile(Adam(0.01),loss=MeanSquaredError())
 
-player_model = DQN((8,8,111),number_of_actions,cnn_model,cnn_model,batch_size=32)
+model_2_target = Agent(number_of_actions,128)
+model_2_target.compile(Adam(0.01),loss=MeanSquaredError())
 
-opp_3 = DDQN((8,8,111),number_of_actions,cnn_model_opp1,cnn_model_opp1)
-opp_2 = DQN((8,8,111),number_of_actions,cnn_model_opp2,cnn_model_opp2)
-
-#player_model = DDPG((8,8,111),(1,),number_of_actions,cnn_model_opp3, cnn_model_opp3)
-
-opponents = [opp_2,opp_3]
+model_2 = DDQN((8,8,111),number_of_actions,model_2_model,model_2_target)
 
 wins = dict()
 matches_played = 0
@@ -52,9 +39,9 @@ matches_played = 0
 avg_rewards = []
 
 
-models = [opp_2,opp_3]
+models = [model_1,model_2]
 
-#testing = play_training_tournament(models,env,1,1)
+new_models,data = play_training_tournament(models,env,40,40)
 
 
 for opponent in opponents:

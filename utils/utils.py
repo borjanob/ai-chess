@@ -68,6 +68,10 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
     Defines :models playing against each other in a tournament setting
     """
 
+    rewards_data = dict()
+    moves_data = dict()
+    data = dict()
+
     for round in range(rounds_in_tournament):
         updated_models = []
         print('===============')
@@ -81,15 +85,28 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
 
             opponents = [ x for x in models if x != model_to_train]
 
-            trained_model, wins_data = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
+            trained_model, wins, avg_moves, avg_rewards = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
 
             updated_models.append(trained_model)
-        
-            print(f'Stats after training {wins_data}')
+
+            print(f'Stats after round {round}: wins = {wins}, average number of moves per win = {avg_moves}, average reward per move = {avg_rewards} ')
             
+            if model_to_train.__class__.__name__ not in rewards_data:
+                rewards_data[model_to_train.__class__.__name__] = avg_rewards
+                moves_data[model_to_train.__class__.__name__] = avg_moves
+            else:
+                rewards_data[model_to_train.__class__.__name__] += avg_rewards
+                moves_data[model_to_train.__class__.__name__] += avg_moves
+
         models = updated_models
 
-    return models
+    for model in models:
+        avg_rewards_for_model = rewards_data[model_to_train.__class__.__name__] / rounds_in_tournament
+        avg_moves_for_model = moves_data[model_to_train.__class__.__name__] / rounds_in_tournament
+
+        data[model.__class__.__name__] = (avg_rewards_for_model,avg_moves_for_model)
+
+    return models, data
 
 
 def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: chess_v6, matches_per_opponent: int = 10,
@@ -100,12 +117,15 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
     Plays one round of matches in a tournament setting
     """
 
-    wins = dict()
+    wins_by_player = dict()
 
     if add_random_opponent:
         opponents.append('random')
 
-    
+    moves_in_matches = 0
+    reward_in_matches = 0
+    moves_in_wins = 0
+
     for opponent in opponents:
         print('================')
         print(f'Playing against {opponent.__class__.__name__}')
@@ -181,6 +201,8 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
 
                 if agent == 'player_0':
                     
+                    moves_in_matches+=1
+
                     if piece_taken_in_move and termination == False:
                         reward = calculate_reward(pieces_by_type_previous,pieces_by_type, rewards_by_piece)
 
@@ -191,19 +213,22 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
 
                     # update model memory after every move
                     model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
-                
+
+ 
                 if agent == 'player_1' and termination:
                     reward = -100
                     # give negative reward on loss
                     model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
                 
+                reward_in_matches += reward
+                
                 
                 if termination or truncation:
                     
-                    if agent not in wins:
-                        wins[agent] = 1
+                    if agent not in wins_by_player:
+                        wins_by_player[agent] = 1
                     else:
-                        wins[agent] +=1
+                        wins_by_player[agent] +=1
 
                     print(f'WINNER: {agent}')
                     break
@@ -221,7 +246,14 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
                 model_to_train.update_target_model()
     
 
-    return model_to_train, wins
+    games_played = len(opponents) * matches_per_opponent
+
+    avg_moves_in_round = moves_in_matches / games_played
+    avg_rewards_per_move = reward_in_matches / moves_in_matches
+
+    wins = wins_by_player['player_0']
+
+    return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move
 
 
 
