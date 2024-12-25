@@ -60,8 +60,26 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
     return wins
 
 
+def add_to_logs(filename, content):
+    """
+    Appends the given content to a file, starting on a new line.
+
+    Args:
+        filename (str): The name of the logs file
+        content (str): The content to be added to logs
+    """
+
+    try:
+        with open(filename, 'a') as file:
+            file.write(f"\n{content}")  # Add a newline before the content
+        print(f"Logs updated successfully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
 def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True ):
+        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'tournament_logs' ):
     
 
     """
@@ -71,7 +89,6 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
     rewards_data = dict()
     moves_data = dict()
     data = dict()
-
     for round in range(rounds_in_tournament):
         updated_models = []
         print('===============')
@@ -85,12 +102,17 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
 
             opponents = [ x for x in models if x != model_to_train]
 
-            trained_model, wins, avg_moves, avg_rewards = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
+            trained_model, wins, avg_moves, avg_rewards, total_number_of_games = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
 
             updated_models.append(trained_model)
 
             print(f'Stats after round {round}: wins = {wins}, average number of moves per win = {avg_moves}, average reward per move = {avg_rewards} ')
             
+
+            info_for_round = f'Model = {model_to_train.__class__.__name__}, Round = {round}, won {wins} games out of {total_number_of_games}, average number of moves per win in this round = {avg_moves}, average reward per move in this round= {avg_rewards} '
+
+            add_to_logs(logs_file_name,info_for_round)
+
             if model_to_train.__class__.__name__ not in rewards_data:
                 rewards_data[model_to_train.__class__.__name__] = avg_rewards
                 moves_data[model_to_train.__class__.__name__] = avg_moves
@@ -98,6 +120,9 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
                 rewards_data[model_to_train.__class__.__name__] += avg_rewards
                 moves_data[model_to_train.__class__.__name__] += avg_moves
 
+            model_to_train.save(1,round)
+
+            
         models = updated_models
 
     for model in models:
@@ -252,8 +277,9 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
     avg_rewards_per_move = reward_in_matches / moves_in_matches
 
     wins = wins_by_player['player_0']
+    total_number_of_games = len(opponents) * matches_per_opponent
 
-    return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move
+    return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move, total_number_of_games
 
 
 

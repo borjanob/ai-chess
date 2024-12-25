@@ -215,7 +215,6 @@ class DDQN:
             else:
                 state = state.reshape(1, self.state_space_shape)
             
-
             # SE MNOZI SO ACTION MASK ZA DA SE NAPRAT 0 TIE AKCII SO NE SE LEGALNI
             # A DA SI OSTANAT x1 TIE SO SE LEGAL
             
@@ -281,7 +280,7 @@ class DDQN:
 
 
 class DuelingDQN:
-    def __init__(self, state_space_shape, num_actions, learning_rate=0.1,
+    def __init__(self, state_space_shape, num_actions,model,target, learning_rate=0.1,
                  discount_factor=0.95, batch_size=16, memory_size=100):
         """
         Initializes Dueling Deep Q Network agent.
@@ -298,6 +297,8 @@ class DuelingDQN:
         self.discount_factor = discount_factor
         self.batch_size = batch_size
         self.memory = deque(maxlen=memory_size)
+        self.model = model
+        self.target_model = model
 
     def _build_model(self, layers):
         """
@@ -345,22 +346,47 @@ class DuelingDQN:
         """
         self.target_model.set_weights(self.model.get_weights())
 
-    def get_action(self, state, epsilon):
+    def get_action(self, state, epsilon, action_mask):
         """
         Returns the best action following epsilon greedy policy for the current state.
         :param state: current state
         :param epsilon: exploration rate
         :return:
         """
+
         probability = np.random.random() + epsilon / self.num_actions
+         # AKO E EXPLORATION
         if probability < epsilon:
-            return np.random.randint(0, self.num_actions)
+
+            # SELECT RANDOM MOVE UNTIL WE GET A VALID RADOM MOVE FROM ACTION MASK
+            is_valid_action = False
+            # safety so loop doesnt get stuck
+            exit_counter = 0
+            while(is_valid_action == False and exit_counter<=1000):
+                action_number = np.random.randint(0, self.num_actions)
+                exit_counter += 1
+                if action_mask[action_number] == 1:
+                    is_valid_action = True
+                    
+            return action_number
+        
         else:
             if isinstance(self.state_space_shape, tuple):
                 state = state.reshape((1,) + self.state_space_shape)
             else:
                 state = state.reshape(1, self.state_space_shape)
-            return np.argmax(self.model.predict(state)[0])
+            
+            # SE MNOZI SO ACTION MASK ZA DA SE NAPRAT 0 TIE AKCII SO NE SE LEGALNI
+            # A DA SI OSTANAT x1 TIE SO SE LEGAL
+            
+            full_predictions = self.model.predict(state)[0]
+
+            # MULTIPLY WITH ACTION MASK
+            legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
+
+            return np.argmax(legal_moves)
+
+
 
     def load(self, model_name, episode):
         """
@@ -406,6 +432,7 @@ class DuelingDQN:
                 state = state.reshape((1,) + self.state_space_shape)
             else:
                 state = state.reshape(1, self.state_space_shape)
+
             target_q = self.model.predict(state)[0]
             target_q[action] = max_future_q
             states[i] = state
