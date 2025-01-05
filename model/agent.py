@@ -6,6 +6,7 @@ from tensorflow.keras import Model
 from tensorflow.nn import softmax
 from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
 
+
 class Agent(Model):
 
     """
@@ -21,8 +22,8 @@ class Agent(Model):
 
         self.first_block = Sequential(
             [
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
                 MaxPooling2D(pool_size=3, padding='same')
                 #Dropout(0.25)
             ]
@@ -30,20 +31,20 @@ class Agent(Model):
 
         self.second_block = Sequential(
             [
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu', data_format = 'channels_last'),
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu',),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu', data_format = 'channels_last'),
+                #Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',),
                 MaxPooling2D(pool_size=3, padding='same')
             #Dropout(0.25)
             ]
         )
 
-        self.third_block = Sequential(
-            [
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu'),
-                Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu'),
-                MaxPooling2D(pool_size=3, padding='same')
-            ]
-        )
+        # self.third_block = Sequential(
+        #     [
+        #         Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu'),
+        #         Conv2D(number_of_hidden_units, kernel_size=3, padding='same', strides=1, activation = 'relu'),
+        #         MaxPooling2D(pool_size=3, padding='same')
+        #     ]
+        # )
 
         self.prediction_block = Sequential(
 
@@ -51,9 +52,7 @@ class Agent(Model):
                 Flatten(),
                 Dense(128,activation = 'relu'),
                 #Dropout(0.25),
-                Dense(64,activation = 'relu'),
-
-                
+                #Dense(64,activation = 'relu'),
                 Dense(number_of_outputs, activation = 'linear')
             ]
         )
@@ -65,7 +64,7 @@ class Agent(Model):
     def call(self,data):
         x = self.first_block(data)
         x = self.second_block(x)
-        x = self.third_block(x)
+        #x = self.third_block(x)
         x = self.prediction_block(x)
 
         #output probabilities

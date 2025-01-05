@@ -5,14 +5,6 @@ from tensorflow.keras.models import Model
 from pettingzoo import AECEnv
 from utils.piece_encodings_full import * 
 
-def adapt_game_state(current_state: [bool]) -> [bool]:
-
-    """
-    Changes the state of the game to a smaller version better suited for training
-    """
-
-    pass
-
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
 
@@ -276,7 +268,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
     avg_moves_in_round = moves_in_matches / games_played
     avg_rewards_per_move = reward_in_matches / moves_in_matches
 
-    wins = wins_by_player['player_0']
+    wins = wins_by_player['player_0'] if 'player_0' in wins_by_player else 0
     total_number_of_games = len(opponents) * matches_per_opponent
 
     return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move, total_number_of_games

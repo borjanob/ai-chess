@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from collections import deque
-from tensorflow.keras.layers import Input, Dense, Concatenate,Flatten
+from tensorflow.keras.layers import Input, Dense, Concatenate,Flatten,Layer
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError, MSE
@@ -89,13 +89,13 @@ class DQN:
 
             return np.argmax(legal_moves)
 
-    def load(self, model_name, episode):
+    def load(self, path_to_weights):
         """
         Loads the weights of the model at specified episode checkpoint.
         :param model_name: name of the model
         :param episode: episode checkpoint
         """
-        self.model.load_weights(f'dqn_{model_name}_{episode}.h5')
+        self.model.load_weights(path_to_weights)
 
     def save(self, model_name, episode):
         """
@@ -278,6 +278,11 @@ class DDQN:
 
         self.model.train_on_batch(states, actions)
 
+class ReduceMeanLayer(Layer):
+    def call(self, inputs):
+        return reduce_mean(inputs, axis=1, keepdims=True)
+
+
 
 class DuelingDQN:
     def __init__(self, state_space_shape, num_actions,model,target, learning_rate=0.1,
@@ -298,7 +303,7 @@ class DuelingDQN:
         self.batch_size = batch_size
         self.memory = deque(maxlen=memory_size)
         self.model = model
-        self.target_model = model
+        self.target_model = target
 
     def _build_model(self, layers):
         """
@@ -314,10 +319,11 @@ class DuelingDQN:
         v = Dense(1)(x)
         a = Dense(self.num_actions)(x)
 
-        q = (v + (a - reduce_mean(a, axis=1, keepdims=True)))
+        q = v + (a - ReduceMeanLayer()(a))
+
 
         model = Model(inputs=input_layer, outputs=q)
-        model.compile(Adam(lr=self.learning_rate), loss=MeanSquaredError())
+        model.compile(Adam(self.learning_rate), loss=MeanSquaredError())
         return model
 
     def build_model(self, layers):
