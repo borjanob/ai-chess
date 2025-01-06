@@ -88,7 +88,7 @@ class DDQN:
 
             # MULTIPLY WITH ACTION MASK
             legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
-
+            legal_moves[legal_moves == 0.0] = -np.inf
             return np.argmax(legal_moves)
 
 

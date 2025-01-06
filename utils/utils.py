@@ -142,7 +142,8 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
     moves_in_matches = 0
     reward_in_matches = 0
     moves_in_wins = 0
-
+    
+    matches_ended_in_illegal_moves = 0
     for opponent in opponents:
         print('================')
         print(f'Playing against {opponent.__class__.__name__}')
@@ -194,14 +195,14 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
                 # illegal move made
                 if moves[action] == 0:
                     
+                    matches_ended_in_illegal_moves +=1
+                    print(f'{agent} made illegal move, terminating game')
+
                     if agent == 'player_0':
 
                         # give negative reward to model being trained for illegal moves
                         reward = -50
                         model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
-                        #wins['player_1'] += 1
-                    # else:
-                    #      wins['player_0'] += 1
 
                     break
                         
@@ -230,8 +231,9 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
 
                     # update model memory after every move
                     model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                
+                
 
- 
                 if agent == 'player_1' and termination:
                     reward = -100
                     # give negative reward on loss
@@ -271,7 +273,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
     wins = wins_by_player['player_0'] if 'player_0' in wins_by_player else 0
     total_number_of_games = len(opponents) * matches_per_opponent
 
-    return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move, total_number_of_games
+    return model_to_train, wins, avg_moves_in_round, avg_rewards_per_move, total_number_of_games, matches_ended_in_illegal_moves
 
 
 
