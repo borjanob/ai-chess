@@ -83,6 +83,18 @@ class DuelingDQN:
         """
         self.target_model.set_weights(self.model.get_weights())
 
+
+    def _get_legal_moves(self,predictions,action_mask):
+        legal_moves = []
+
+        for i in range(len(predictions)):
+            if action_mask[i] == 0:
+                legal_moves.append(-np.inf)
+            else:
+                legal_moves.append(predictions[i])
+        return legal_moves
+
+
     def get_action(self, state, epsilon, action_mask):
         """
         Returns the best action following epsilon greedy policy for the current state.
@@ -119,10 +131,12 @@ class DuelingDQN:
             full_predictions = self.model.predict(state)[0]
 
             # MULTIPLY WITH ACTION MASK
-            legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
+            # legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
             
-            legal_moves[legal_moves == 0.0] = -np.inf
+            # final_moves = [x if x != 0.0 or x != -0.0 else -np.inf for x in legal_moves]
 
+            legal_moves = self._get_legal_moves(full_predictions,action_mask)
+            print(max(legal_moves))
             return np.argmax(legal_moves)
 
 

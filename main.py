@@ -11,7 +11,7 @@ from pettingzoo import AECEnv
 from utils.utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces,add_to_logs
 from utils.piece_encodings_full import *
 import tensorflow as tf
-from utils.q_learning import DDPG
+
 
 
 env = chess_v6.env(render_mode="human")
@@ -51,6 +51,6 @@ avg_rewards = []
 
 models = [model_1,player_model]
 
-new_models,data = play_training_tournament(models,env,1,1,add_random_opponents=False)
+new_models,data = play_training_tournament(models,env,rounds_in_tournament=5,matches_per_opponent=1,add_random_opponents=False)
 
 env.close()

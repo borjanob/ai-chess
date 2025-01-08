@@ -69,9 +69,8 @@ def add_to_logs(filename, content):
         print(f"An error occurred: {e}")
 
 
-
 def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'tournament_logs' ):
+        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'logs/tournament_logs.txt' ):
     
 
     """
@@ -94,11 +93,11 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
 
             opponents = [ x for x in models if x != model_to_train]
 
-            trained_model, wins, avg_moves, avg_rewards, total_number_of_games = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
+            trained_model, wins, avg_moves, avg_rewards, total_number_of_games,illegals = _play_tournament_round(model_to_train, opponents, env,matches_per_opponent, episodes_for_target_update, add_random_opponents)
 
             updated_models.append(trained_model)
 
-            print(f'Stats after round {round}: wins = {wins}, average number of moves per win = {avg_moves}, average reward per move = {avg_rewards} ')
+            print(f'Stats after round {round}: wins = {wins} with {illegals} illegal move timeouts, average number of moves per win = {avg_moves}, average reward per move = {avg_rewards} ')
             
 
             info_for_round = f'Model = {model_to_train.__class__.__name__}, Round = {round}, won {wins} games out of {total_number_of_games}, average number of moves per win in this round = {avg_moves}, average reward per move in this round= {avg_rewards} '
@@ -112,7 +111,8 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
                 rewards_data[model_to_train.__class__.__name__] += avg_rewards
                 moves_data[model_to_train.__class__.__name__] += avg_moves
 
-            model_to_train.save(1,round)
+            if round % 5 == 0:
+                model_to_train.save('agent',round + 1)
 
             
         models = updated_models

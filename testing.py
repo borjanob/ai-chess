@@ -12,6 +12,9 @@ from utils.utils import play_training_tournament, play_vs_random, calculate_rewa
 from utils.piece_encodings_full import *
 import tensorflow as tf
 from utils.q_learning import DDPG
+import torch
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 env = chess_v6.env(render_mode="human")
@@ -56,6 +59,7 @@ print("Available devices:")
 for device in tf.config.list_physical_devices():
     print(device)
 
+
 for opponent in models:
     print('================')
     print(f'Playing against {opponent.__class__.__name__}')
@@ -69,7 +73,7 @@ for opponent in models:
         # from piece_encodings.py
         pieces_by_type_previous = piece_nums
         initial_state = True
-
+        move_counter = 0
         for agent in env.agent_iter():
             
             print(f'{agent} making a move')
@@ -98,7 +102,7 @@ for opponent in models:
                         action = player_model.get_action(converted_state,0.01,moves)
 
             env.step(action)
-            print('move made changing agents')
+            move_counter +=1
             new_observation, reward, termination, truncation, info = env.last()
 
             new_state = new_observation['observation']
@@ -173,6 +177,7 @@ for opponent in models:
                     wins[agent] +=1
 
                 print(f'WINNER: {agent}')
+                print(f'Number of moves in game = {move_counter}')
                 break
             
             # set previous board state to equal current state after change

@@ -43,6 +43,18 @@ class DDQN:
         """
         self.memory.append((state, action, reward, next_state, done))
 
+
+    def _get_legal_moves(self,predictions,action_mask):
+        legal_moves = []
+
+        for i in range(len(predictions)):
+            if action_mask[i] == 0:
+                legal_moves.append(-np.inf)
+            else:
+                legal_moves.append(predictions[i])
+        return legal_moves
+
+
     def update_target_model(self):
         """
         Synchronize the target model with the main model.
@@ -87,8 +99,11 @@ class DDQN:
             full_predictions = self.model.predict(state)[0]
 
             # MULTIPLY WITH ACTION MASK
-            legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
-            legal_moves[legal_moves == 0.0] = -np.inf
+            # legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
+
+            # final_moves = [x if x != 0.0 or x != -0.0 else -np.inf for x in legal_moves]
+            legal_moves = self._get_legal_moves(full_predictions,action_mask)
+            print(max(legal_moves))
             return np.argmax(legal_moves)
 
 

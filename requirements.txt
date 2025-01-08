@@ -1,4 +1,6 @@
-pettingzoo == '1.24.0'
+wheel
+pettingzoo == 1.24.0
 chess
 tensorflow
 numpy
+pygame
