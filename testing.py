@@ -8,14 +8,13 @@ from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, Gradien
 import numpy as np
 from model.agent import Agent
 from pettingzoo import AECEnv
-from utils.utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces,add_to_logs
+from utils.utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces,add_to_logs,play_training_tournament_with_2_agents
 from utils.piece_encodings_full import *
 import tensorflow as tf
 from utils.q_learning import DDPG
 import torch
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
 
 env = chess_v6.env(render_mode="human")
 env.reset(seed=42)
@@ -33,37 +32,26 @@ p_model.compile(Adam(0.01),loss=MeanSquaredError())
 
 layers = p_model.layers
 
-player_model = DuelingDQN((8,8,111),number_of_actions,layers,batch_size=32)
+dueling = DuelingDQN((8,8,111),number_of_actions,layers,batch_size=32)
 
-model_1 = DQN((8,8,111),number_of_actions,model_1_model,model_1_target,batch_size=32)
+dqn = DQN((8,8,111),number_of_actions,model_1_model,model_1_target,batch_size=32)
 
 model_2_model = Agent(number_of_actions,128)
 model_2_model.compile(Adam(0.01),loss=MeanSquaredError())
 
 model_2_target = Agent(number_of_actions,128)
 
-model_2 = DDQN((8,8,111),number_of_actions,model_2_model,model_2_target)
+ddqn = DDQN((8,8,111),number_of_actions,model_2_model,model_2_target)
 
-initial_weights = player_model.model.weights
-
-#player_model.save('12','12')
-empty_tensor = tf.zeros((1,8,8,111), dtype=float32)
-
-player_model.model.predict(empty_tensor)
-
-player_model.load('duelingdqn_agent_20.weights.h5')
 
 wins = dict()
 matches_played = 0
 illegal_moves = 0
 avg_rewards = []
 moves_timeout = 0
-models = [model_1,player_model]
+models = [dueling,ddqn,dqn]
 
-
-print("Available devices:")
-for device in tf.config.list_physical_devices():
-    print(device)
+models,data = play_training_tournament_with_2_agents(models,env,1,1)
 
 
 for opponent in models:

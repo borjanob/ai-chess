@@ -4,7 +4,7 @@ from model.agent import Agent
 from tensorflow.keras.models import Model 
 from pettingzoo import AECEnv
 from utils.piece_encodings_full import * 
-
+import random
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
 
@@ -84,6 +84,8 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
         updated_models = []
         print('===============')
         print(f'Round {round}: ')
+
+        random.shuffle(models)
 
         for model_to_train in models:
             
@@ -293,7 +295,8 @@ def play_training_tournament_with_2_agents(models: list[Model], env: chess_v6, m
         print('===============')
         print(f'Round {round}: ')
 
-  
+        random.shuffle(models)
+
         updated_models = _play_tournament_round_update_2_agents(models, env,round,matches_per_opponent, episodes_for_target_update, add_random_opponent, logs_file_name)
        
         models = updated_models

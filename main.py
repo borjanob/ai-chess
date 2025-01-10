@@ -57,7 +57,7 @@ matches_played = 0
 illegal_moves = 0
 avg_rewards = []
 
-dueling.load('trained_models/duelingdqn_agent_20.weights.h5')
+dueling.load('duelingdqn_agent_20.weights.h5')
 
 models = [dqn,ddqn,dueling]
 #start_time = time.time()
