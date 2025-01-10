@@ -31,9 +31,6 @@ model_1_target = Agent(number_of_actions,128)
 p_model = Agent(number_of_actions,128)
 p_model.compile(Adam(0.01),loss=MeanSquaredError())
 
-p_target = Agent(number_of_actions,128)
-
-
 layers = p_model.layers
 
 player_model = DuelingDQN((8,8,111),number_of_actions,layers,batch_size=32)
@@ -46,6 +43,15 @@ model_2_model.compile(Adam(0.01),loss=MeanSquaredError())
 model_2_target = Agent(number_of_actions,128)
 
 model_2 = DDQN((8,8,111),number_of_actions,model_2_model,model_2_target)
+
+initial_weights = player_model.model.weights
+
+#player_model.save('12','12')
+empty_tensor = tf.zeros((1,8,8,111), dtype=float32)
+
+player_model.model.predict(empty_tensor)
+
+player_model.load('duelingdqn_agent_20.weights.h5')
 
 wins = dict()
 matches_played = 0

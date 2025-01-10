@@ -51,6 +51,6 @@ avg_rewards = []
 
 models = [model_1,player_model]
 
-new_models,data = play_training_tournament(models,env,rounds_in_tournament=5,matches_per_opponent=1,add_random_opponents=False)
+new_models,data = play_training_tournament(models,env,rounds_in_tournament=1,matches_per_opponent=1,add_random_opponents=False)
 
 env.close()
