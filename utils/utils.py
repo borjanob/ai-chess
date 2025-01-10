@@ -110,11 +110,12 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
                 rewards_data[model_to_train.__class__.__name__] += avg_rewards
                 moves_data[model_to_train.__class__.__name__] += avg_moves
 
-            if round % 5 == 0:
+            if (round+1) % 2 == 0:
                 model_to_train.save('agent',round + 1)
 
-            
         models = updated_models
+        add_to_logs(logs_file_name,'')
+
 
     for model in models:
         avg_rewards_for_model = rewards_data[model_to_train.__class__.__name__] / rounds_in_tournament
@@ -259,7 +260,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
             #print('match finished')
             model_to_train.train()
 
-            if match % episodes_for_target_update == 0:
+            if (match+1) % episodes_for_target_update == 0:
                 print('Updating target model')
                 model_to_train.update_target_model()
     

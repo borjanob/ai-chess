@@ -1,0 +1,80 @@
+
+Model = DQN, Round = 1, won 42 games out of 60, average number of moves per win in this round = 54.53333333333333, average reward per move in this round= 1.1136919315403424, ended by illegal moves = 0 
+Model = DDQN, Round = 1, won 40 games out of 60, average number of moves per win in this round = 44.95, average reward per move in this round= 1.206896551724138, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 1, won 38 games out of 60, average number of moves per win in this round = 50.61666666666667, average reward per move in this round= 0.8735594336516299, ended by illegal moves = 2 
+
+Model = DQN, Round = 2, won 43 games out of 60, average number of moves per win in this round = 56.983333333333334, average reward per move in this round= 1.2638198303597543, ended by illegal moves = 2 
+Model = DDQN, Round = 2, won 37 games out of 60, average number of moves per win in this round = 50.6, average reward per move in this round= 0.9522397891963109, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 2, won 53 games out of 60, average number of moves per win in this round = 52.13333333333333, average reward per move in this round= 1.719309462915601, ended by illegal moves = 1 
+
+Model = DQN, Round = 3, won 37 games out of 60, average number of moves per win in this round = 54.1, average reward per move in this round= 0.8869377695625386, ended by illegal moves = 3 
+Model = DDQN, Round = 3, won 38 games out of 60, average number of moves per win in this round = 48.7, average reward per move in this round= 1.0010266940451746, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 3, won 25 games out of 60, average number of moves per win in this round = 42.61666666666667, average reward per move in this round= 0.021900664841611264, ended by illegal moves = 2 
+
+Model = DQN, Round = 4, won 46 games out of 60, average number of moves per win in this round = 40.11666666666667, average reward per move in this round= 1.5936850851682594, ended by illegal moves = 1 
+Model = DDQN, Round = 4, won 46 games out of 60, average number of moves per win in this round = 31.15, average reward per move in this round= 1.9143927233814875, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 4, won 18 games out of 60, average number of moves per win in this round = 45.31666666666667, average reward per move in this round= -0.6384700257447591, ended by illegal moves = 1 
+
+Model = DQN, Round = 5, won 52 games out of 60, average number of moves per win in this round = 33.833333333333336, average reward per move in this round= 2.3955665024630544, ended by illegal moves = 2 
+Model = DDQN, Round = 5, won 52 games out of 60, average number of moves per win in this round = 24.183333333333334, average reward per move in this round= 3.264645072363887, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 5, won 16 games out of 60, average number of moves per win in this round = 46.38333333333333, average reward per move in this round= -0.6920589292130794, ended by illegal moves = 1 
+
+Model = DQN, Round = 6, won 58 games out of 60, average number of moves per win in this round = 33.46666666666667, average reward per move in this round= 2.9008964143426295, ended by illegal moves = 0 
+Model = DDQN, Round = 6, won 52 games out of 60, average number of moves per win in this round = 37.35, average reward per move in this round= 2.185631414547077, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 6, won 13 games out of 60, average number of moves per win in this round = 53.833333333333336, average reward per move in this round= -0.6721362229102167, ended by illegal moves = 1 
+
+Model = DQN, Round = 7, won 51 games out of 60, average number of moves per win in this round = 47.25, average reward per move in this round= 1.6243386243386244, ended by illegal moves = 1 
+Model = DDQN, Round = 7, won 53 games out of 60, average number of moves per win in this round = 35.71666666666667, average reward per move in this round= 2.354176388240784, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 7, won 12 games out of 60, average number of moves per win in this round = 62.35, average reward per move in this round= -0.6099973269179364, ended by illegal moves = 1 
+
+Model = DQN, Round = 8, won 56 games out of 60, average number of moves per win in this round = 35.233333333333334, average reward per move in this round= 2.596499526963103, ended by illegal moves = 0 
+Model = DDQN, Round = 8, won 53 games out of 60, average number of moves per win in this round = 32.61666666666667, average reward per move in this round= 2.577414409810935, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 8, won 17 games out of 60, average number of moves per win in this round = 51.3, average reward per move in this round= -0.5653021442495126, ended by illegal moves = 1 
+
+Model = DQN, Round = 9, won 54 games out of 60, average number of moves per win in this round = 34.56666666666667, average reward per move in this round= 2.472999035679846, ended by illegal moves = 1 
+Model = DDQN, Round = 9, won 53 games out of 60, average number of moves per win in this round = 32.3, average reward per move in this round= 2.5995872033023737, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 9, won 13 games out of 60, average number of moves per win in this round = 50.71666666666667, average reward per move in this round= -0.8432467959250739, ended by illegal moves = 1 
+
+Model = DQN, Round = 10, won 59 games out of 60, average number of moves per win in this round = 38.18333333333333, average reward per move in this round= 2.6735050196420778, ended by illegal moves = 0 
+Model = DDQN, Round = 10, won 55 games out of 60, average number of moves per win in this round = 32.083333333333336, average reward per move in this round= 2.732987012987013, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 10, won 20 games out of 60, average number of moves per win in this round = 53.28333333333333, average reward per move in this round= -0.36409133562715046, ended by illegal moves = 1 
+
+Model = DQN, Round = 11, won 53 games out of 60, average number of moves per win in this round = 33.583333333333336, average reward per move in this round= 2.4511166253101737, ended by illegal moves = 1 
+Model = DDQN, Round = 11, won 54 games out of 60, average number of moves per win in this round = 41.083333333333336, average reward per move in this round= 2.1253549695740364, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 11, won 13 games out of 60, average number of moves per win in this round = 58.81666666666667, average reward per move in this round= -0.6531595352791159, ended by illegal moves = 3 
+
+Model = DQN, Round = 12, won 50 games out of 60, average number of moves per win in this round = 25.15, average reward per move in this round= 2.8827037773359843, ended by illegal moves = 2 
+Model = DDQN, Round = 12, won 56 games out of 60, average number of moves per win in this round = 39.5, average reward per move in this round= 2.3556962025316457, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 12, won 15 games out of 60, average number of moves per win in this round = 34.28333333333333, average reward per move in this round= -1.29606222654351, ended by illegal moves = 0 
+
+Model = DQN, Round = 13, won 56 games out of 60, average number of moves per win in this round = 26.8, average reward per move in this round= 3.398009950248756, ended by illegal moves = 1 
+Model = DDQN, Round = 13, won 53 games out of 60, average number of moves per win in this round = 27.8, average reward per move in this round= 3.0017985611510793, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 13, won 21 games out of 60, average number of moves per win in this round = 39.21666666666667, average reward per move in this round= -0.5435614109647259, ended by illegal moves = 0 
+
+Model = DQN, Round = 14, won 56 games out of 60, average number of moves per win in this round = 33.78333333333333, average reward per move in this round= 2.7010360138135177, ended by illegal moves = 0 
+Model = DDQN, Round = 14, won 56 games out of 60, average number of moves per win in this round = 27.2, average reward per move in this round= 3.4454656862745097, ended by illegal moves = 2 
+Model = DuelingDQN, Round = 14, won 30 games out of 60, average number of moves per win in this round = 30.616666666666667, average reward per move in this round= 0.15405552531301034, ended by illegal moves = 0 
+
+Model = DQN, Round = 15, won 52 games out of 60, average number of moves per win in this round = 26.15, average reward per move in this round= 2.9305289993626515, ended by illegal moves = 0 
+Model = DDQN, Round = 15, won 52 games out of 60, average number of moves per win in this round = 29.083333333333332, average reward per move in this round= 2.687679083094556, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 15, won 17 games out of 60, average number of moves per win in this round = 34.65, average reward per move in this round= -1.0072150072150072, ended by illegal moves = 2 
+
+Model = DQN, Round = 16, won 55 games out of 60, average number of moves per win in this round = 27.166666666666668, average reward per move in this round= 3.405521472392638, ended by illegal moves = 3 
+Model = DDQN, Round = 16, won 56 games out of 60, average number of moves per win in this round = 20.25, average reward per move in this round= 4.423868312757202, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 16, won 15 games out of 60, average number of moves per win in this round = 31.733333333333334, average reward per move in this round= -1.3503151260504203, ended by illegal moves = 2 
+
+Model = DQN, Round = 17, won 54 games out of 60, average number of moves per win in this round = 26.85, average reward per move in this round= 3.19056486654252, ended by illegal moves = 1 
+Model = DDQN, Round = 17, won 50 games out of 60, average number of moves per win in this round = 23.183333333333334, average reward per move in this round= 3.0611071171818836, ended by illegal moves = 1 
+Model = DuelingDQN, Round = 17, won 16 games out of 60, average number of moves per win in this round = 26.95, average reward per move in this round= -1.5714285714285714, ended by illegal moves = 1 
+
+Model = DQN, Round = 18, won 50 games out of 60, average number of moves per win in this round = 29.283333333333335, average reward per move in this round= 2.577120091064314, ended by illegal moves = 3 
+Model = DDQN, Round = 18, won 54 games out of 60, average number of moves per win in this round = 34.516666666666666, average reward per move in this round= 2.4640270400772573, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 18, won 16 games out of 60, average number of moves per win in this round = 26.366666666666667, average reward per move in this round= -1.5322376738305943, ended by illegal moves = 2 
+
+Model = DQN, Round = 19, won 52 games out of 60, average number of moves per win in this round = 29.25, average reward per move in this round= 2.7566951566951565, ended by illegal moves = 2 
+Model = DDQN, Round = 19, won 53 games out of 60, average number of moves per win in this round = 32.9, average reward per move in this round= 2.629179331306991, ended by illegal moves = 3 
+Model = DuelingDQN, Round = 19, won 15 games out of 60, average number of moves per win in this round = 35.63333333333333, average reward per move in this round= -1.3077642656688493, ended by illegal moves = 0 
+
+Model = DQN, Round = 20, won 53 games out of 60, average number of moves per win in this round = 37.31666666666667, average reward per move in this round= 2.335864225100491, ended by illegal moves = 3 
+Model = DDQN, Round = 20, won 54 games out of 60, average number of moves per win in this round = 26.816666666666666, average reward per move in this round= 3.087010565568676, ended by illegal moves = 0 
+Model = DuelingDQN, Round = 20, won 18 games out of 60, average number of moves per win in this round = 36.416666666666664, average reward per move in this round= -0.9853546910755149, ended by illegal moves = 0 
