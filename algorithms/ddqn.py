@@ -121,7 +121,7 @@ class DDQN:
         :param model_name: name of the model
         :param episode: episode checkpoint
         """
-        self.model.save_weights(f'ddqn_{model_name}_{episode}.h5')
+        self.model.save_weights(f'ddqn_{model_name}_{episode}.weights.h5')
 
     def train(self):
         """
