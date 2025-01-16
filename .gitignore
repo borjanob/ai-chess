@@ -1,3 +1,4 @@
 __pycache__/
 .env
 todo_done.py
+trained_models/

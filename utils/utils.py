@@ -52,6 +52,11 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
     return wins
 
 
+def play_match(env, players, number_of_games):
+
+    wins = dict()
+
+
 def add_to_logs(filename, content):
     """
     Appends the given content to a file, starting on a new line.
@@ -342,7 +347,6 @@ def _play_tournament_round_update_2_agents(models: list[Model], env: chess_v6,ro
     updated_opponents = []
     matches_ended_in_illegal_moves = 0
 
-
     # every model is the white player against every other model
 
     for white_player in models:
@@ -519,7 +523,9 @@ def _play_tournament_round_update_2_agents(models: list[Model], env: chess_v6,ro
 
         info_for_round = f'Model = {white_player.__class__.__name__}, Round = {round + 1}, won {wins} games out of {total_number_of_games}, average number of moves per win in this round = {avg_moves_in_round}, average reward per move in this round= {avg_rewards_per_move} '
 
-        add_to_logs(logs_file_name,info_for_round)      
+        add_to_logs(logs_file_name,info_for_round)  
+
+        models = [x for x in models if x != 'random']    
 
     return models
 
