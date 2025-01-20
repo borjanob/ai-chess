@@ -6,7 +6,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError, MSE
 from tensorflow import reduce_mean, convert_to_tensor, squeeze, GradientTape, float32
-import tensorflow
+import tensorflow as tf
 
 class DDQN:
     def __init__(self, state_space_shape, num_actions, model, target_model, learning_rate=0.1,
@@ -78,7 +78,7 @@ class DDQN:
             is_valid_action = False
             # safety so loop doesnt get stuck
             exit_counter = 0
-            while(is_valid_action == False and exit_counter<=1000):
+            while(is_valid_action == False and exit_counter<=3000):
                 action_number = np.random.randint(0, self.num_actions)
                 exit_counter += 1
                 if action_mask[action_number] == 1:
@@ -107,13 +107,24 @@ class DDQN:
             return np.argmax(legal_moves)
 
 
-    def load(self, path_to_weights):
+    def load(self, path_to_weights, update_target_model = True):
         """
         Loads the weights of the model at specified episode checkpoint.
         :param model_name: name of the model
         :param episode: episode checkpoint
         """
+
+        zeros = tf.zeros((1,8,8,111), dtype=float32)
+        self.model.predict(zeros)
+
         self.model.load_weights(path_to_weights)
+
+        if update_target_model:
+            self.target_model.predict(zeros)
+            self.target_model.load_weights(path_to_weights)
+
+    def save_full_model(self, episode):
+        self.model.save(f'ddqn_model_{episode}.h5')
 
     def save(self, model_name, episode):
         """

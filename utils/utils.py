@@ -5,6 +5,8 @@ from tensorflow.keras.models import Model
 from pettingzoo import AECEnv
 from utils.piece_encodings_full import * 
 import random
+
+
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
 
@@ -52,12 +54,148 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
     return wins
 
 
-def play_match(env, players, number_of_games):
+def play_matches(env: chess_v6, players : list, number_of_games: int = 10, logs_file_name = 'logs/matches.txt'):
 
-    wins = dict()
+    white_wins = dict()
+    black_wins = dict()
+
+    if len(players) != 2:
+        raise Exception('2 players are required to play a match')
 
 
+    first_agent_name = players[0].__class__.__name__
+    second_agent_name = players[1].__class__.__name__
+
+    white_player = players[0]
+    black_player = players[1]
+    switched = False
+
+    game_to_switch = number_of_games/2
+
+    white_player_name = white_player.__class__.__name__
+    black_player_name = black_player.__class__.__name__
+    matches_ended_in_illegal_moves = 0
+
+    for game in range(number_of_games):
+
+        print('===============')
+        print(f'Starting {game} out of {number_of_games}')
+        print('===============')
+
+        if game >= game_to_switch and switched == False:
+
+            white_player = players[1]
+            black_player = players[0]
+            
+            white_player_name = white_player.__class__.__name__
+            black_player_name = black_player.__class__.__name__
+
+            switched = True
+
+        env.reset()
+
+        print('===============')
+        print(f'{white_player_name} playing with white , {black_player_name} playing with black')
+        print('===============')
+
+
+
+        for agent in env.agent_iter():
+                
+            print(f'{agent} making a move')
+
+            observation, reward, termination, truncation, info = env.last()
+            state = observation['observation']
+                
+            moves = observation["action_mask"]             
+
+            if max(moves) == 0:
+                print('No legal moves left')
+
+                if agent == 'player_1':
+                    
+                    if white_player_name not in white_wins:
+                        white_wins[white_player_name] = 1
+                    else:
+                        white_wins[white_player_name] +=1
+
+                    print(f'WINNER: {white_player_name}')
+                
+                else:
+
+                    if black_player_name not in black_wins:
+                        black_wins[black_player_name] = 1
+                    else:
+                        black_wins[black_player_name] +=1
+
+                    print(f'WINNER: {black_player_name}')
+
+                break
+
+            expanded_state = np.expand_dims(state, axis = 0)
+            converted_state = np.array(expanded_state, dtype=float)
+
+            if agent == 'player_1':
+                action = black_player.get_action(converted_state,0.1,moves)
+
+            else:
+                action = white_player.get_action(converted_state,0.1,moves)
+
+
+            env.step(action)
+
+            new_observation, reward, termination, truncation, info = env.last()
+
+            new_state = new_observation['observation']
+                
+            # illegal move made
+            if moves[action] == 0:
+                    
+                matches_ended_in_illegal_moves +=1
+                print(f'Illegal move made, terminating game!')
+                break
+
+                
+            if termination or truncation:
+                
+                if agent == 'player_0':
+                    
+                    if white_player_name not in white_wins:
+                        white_wins[white_player_name] = 1
+                    else:
+                        white_wins[white_player_name] +=1
+
+                    print(f'WINNER: {white_player_name}')
+                
+                else:
+
+                    if black_player_name not in black_wins:
+                        black_wins[black_player_name] = 1
+                    else:
+                        black_wins[black_player_name] +=1
+
+                    print(f'WINNER: {black_player_name}')
+
+                break
+    
+    first_agent_wins_as_white = white_wins[first_agent_name] if first_agent_name in white_wins else 0 
+    first_agent_wins_as_black = black_wins[first_agent_name] if first_agent_name in black_wins else 0
+    second_agent_wins_as_white = white_wins[second_agent_name] if second_agent_name in white_wins else 0 
+    second_agent_wins_as_black = black_wins[second_agent_name] if second_agent_name in black_wins else 0
+
+    round_info = f'{first_agent_name} playing against {second_agent_name} for {number_of_games} games'
+
+    first_agent_info = f'{first_agent_name} won {first_agent_wins_as_white} playing with white, {first_agent_wins_as_black} playing with black'
+    second_agent_info = f'{second_agent_name} won {second_agent_wins_as_white} playing with white, {second_agent_wins_as_black} playing with black'
+
+    to_add = [round_info,first_agent_info,second_agent_info]
+
+    add_to_logs(filename=logs_file_name, content=to_add)
+
+
+    return white_wins, black_wins
 def add_to_logs(filename, content):
+
     """
     Appends the given content to a file, starting on a new line.
 
@@ -65,16 +203,19 @@ def add_to_logs(filename, content):
         filename (str): The name of the logs file
         content (str): The content to be added to logs
     """
-
     try:
         with open(filename, 'a') as file:
-            file.write(f"\n{content}")  # Add a newline before the content
+            if isinstance(content, list):
+                for line in content:
+                    file.write(f"\n{line}")
+            else:
+                file.write(f"\n{content}")  # Add a newline before the content
         print(f"Logs updated successfully.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
-def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
+def play_training_tournament(models: list, env: chess_v6, matches_per_opponent: int = 10,
         rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'logs/tournament_logs.txt' ):
     
 
@@ -133,7 +274,7 @@ def play_training_tournament(models: list[Model], env: chess_v6, matches_per_opp
     return models, data
 
 
-def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: chess_v6, matches_per_opponent: int = 10,
+def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6, matches_per_opponent: int = 10,
             episodes_for_target_update: int = 5, add_random_opponent: bool = True    ) -> dict:
     
 
@@ -284,7 +425,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list[Model], env: c
 
 
 
-def play_training_tournament_with_2_agents(models: list[Model], env: chess_v6, matches_per_opponent: int = 10,
+def play_training_tournament_with_2_agents(models: list, env: chess_v6, matches_per_opponent: int = 10,
         rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponent: bool = True, logs_file_name = 'logs/tournament_logs_2.txt' ):
     
 
@@ -313,9 +454,9 @@ def play_training_tournament_with_2_agents(models: list[Model], env: chess_v6, m
         #         rewards_data[model_to_train.__class__.__name__] += avg_rewards
         #         moves_data[model_to_train.__class__.__name__] += avg_moves
 
-        if round + 1 % 5 == 0:
+        if (round + 1) % 5 == 0:
                 for model in models:
-                    model.save('agent', round + 1)
+                    model.save('agent', round + 21)
 
             
 
@@ -328,7 +469,7 @@ def play_training_tournament_with_2_agents(models: list[Model], env: chess_v6, m
     return models, data
 
 
-def _play_tournament_round_update_2_agents(models: list[Model], env: chess_v6,round:int, matches_per_opponent: int = 10,
+def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int, matches_per_opponent: int = 10,
             episodes_for_target_update: int = 5, add_random_opponent: bool = True, logs_file_name = 'logs/tournament_logs_2.txt'    ) -> dict:
     
 
@@ -468,7 +609,7 @@ def _play_tournament_round_update_2_agents(models: list[Model], env: chess_v6,ro
                         if reward_for_black > 0:
 
                             print(f'REWARD IS {reward_for_black}')
-                            reward_for_white = 0 - reward
+                            reward_for_white = 0 - reward_for_black
                             
                             # give negative reward to opponent on loss or lost piece
                             white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
@@ -525,7 +666,9 @@ def _play_tournament_round_update_2_agents(models: list[Model], env: chess_v6,ro
 
         add_to_logs(logs_file_name,info_for_round)  
 
-        models = [x for x in models if x != 'random']    
+        #models = [x for x in models if x != 'random']
+        if add_random_opponent:
+            models.remove('random')
 
     return models
 

@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Input, Dense, Concatenate, Conv2D, Flatten, MaxPooling2D, Dropout, ReLU
+from tensorflow.keras.layers import Input, Dense, Concatenate, Conv2D, Flatten, MaxPooling2D, Dropout, ReLU, BatchNormalization
 from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError, MSE
@@ -22,8 +22,8 @@ class Agent(Model):
 
         self.first_block = Sequential(
             [
-                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
-                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last'),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last', kernel_initializer='he_normal'),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',data_format = 'channels_last', kernel_initializer='he_normal'),
                 MaxPooling2D(pool_size=3, padding='same')
                 #Dropout(0.25)
             ]
@@ -31,10 +31,10 @@ class Agent(Model):
 
         self.second_block = Sequential(
             [
-                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu', data_format = 'channels_last'),
+                Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu', data_format = 'channels_last', kernel_initializer='he_normal'),
                 #Conv2D(number_of_hidden_units, kernel_size=2, padding='same', strides=1, activation = 'relu',),
                 MaxPooling2D(pool_size=3, padding='same')
-            #Dropout(0.25)
+                #Dropout(0.25)
             ]
         )
 
@@ -50,7 +50,7 @@ class Agent(Model):
 
             [
                 Flatten(),
-                Dense(128,activation = 'relu'),
+                Dense(128,activation = 'linear'),
                 #Dropout(0.25),
                 #Dense(64,activation = 'relu'),
                 Dense(number_of_outputs, activation = 'linear')
@@ -61,9 +61,13 @@ class Agent(Model):
 
         self.dropout = Dropout(0.25)
 
+        self.normalize = BatchNormalization()
+
     def call(self,data):
         x = self.first_block(data)
+        x = self.normalize(x)
         x = self.second_block(x)
+        x = self.normalize(x)
         #x = self.third_block(x)
         x = self.prediction_block(x)
 

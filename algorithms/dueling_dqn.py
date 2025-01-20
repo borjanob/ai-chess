@@ -111,7 +111,7 @@ class DuelingDQN:
             is_valid_action = False
             # safety so loop doesnt get stuck
             exit_counter = 0
-            while(is_valid_action == False and exit_counter<=1000):
+            while(is_valid_action == False and exit_counter<=3000):
                 action_number = np.random.randint(0, self.num_actions)
                 exit_counter += 1
                 if action_mask[action_number] == 1:
@@ -141,13 +141,16 @@ class DuelingDQN:
 
 
 
-    def load(self, path_to_weights):
+    def load(self, path_to_weights,update_target_model = True):
         """
         Loads the weights of the model at specified episode checkpoint.
         :param model_name: name of the model
         :param episode: episode checkpoint
         """
         self.model.load_weights(path_to_weights)
+
+        if update_target_model:
+            self.target_model.load_weights(path_to_weights)
 
     def save(self, model_name, episode):
         """
@@ -156,6 +159,9 @@ class DuelingDQN:
         :param episode: episode checkpoint
         """
         self.model.save_weights(f'duelingdqn_{model_name}_{episode}.weights.h5')
+    
+    def save_full_model(self, episode):
+        self.model.save(f'duelingdqn_model_{episode}.h5')
 
     def train(self):
         """

@@ -1,4 +1,5 @@
 __pycache__/
 .env
 todo_done.py
-trained_models/
+trained_model_weights/
+.vscode/

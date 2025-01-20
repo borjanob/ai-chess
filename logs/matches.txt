@@ -1,0 +1,24 @@
+DQN playing against DDQN for 10 games
+DQN won 1 playing with white, 2 playing with black
+DDQN won 3 playing with white, 4 playing with black
+
+DQN playing against DuelingDQN for 10 games
+DQN won 2 playing with white, 0 playing with black
+DuelingDQN won 5 playing with white, 3 playing with black
+
+DDQN playing against DuelingDQN for 10 games
+DDQN won 4 playing with white, 2 playing with black
+DuelingDQN won 3 playing with white, 1 playing with black
+
+
+DQN playing against DDQN for 10 games
+DQN won 1 playing with white, 0 playing with black
+DDQN won 5 playing with white, 4 playing with black
+
+DQN playing against DuelingDQN for 10 games
+DQN won 3 playing with white, 4 playing with black
+DuelingDQN won 0 playing with white, 1 playing with black
+
+DDQN playing against DuelingDQN for 10 games
+DDQN won 5 playing with white, 4 playing with black
+DuelingDQN won 1 playing with white, 0 playing with black
