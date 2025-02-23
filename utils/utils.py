@@ -5,7 +5,7 @@ from tensorflow.keras.models import Model
 from pettingzoo import AECEnv
 from utils.piece_encodings_full import * 
 import random
-
+from algorithms.ppo import PPO
 
 def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
@@ -51,7 +51,12 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
             if agent == 'player_1':
                 action = env.action_space(agent).sample(moves)
             else:
-                action = model.get_action(converted_state,0.01,moves)
+
+                if isinstance(model, PPO):
+                    action, probability = model.get_action(converted_state,0.01,moves)
+                else:
+
+                    action = model.get_action(converted_state,0.01,moves)
 
             #TAKE ACTION
             env.step(action)
@@ -84,18 +89,14 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
                         print(f'REWARD IS {reward}')
 
                     # update model memory after every move
-                    model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                    if isinstance(model, PPO):
+                        model.update_memory(state,action,reward,new_state,1 if termination or truncation else 0, probability)
+                    else:
+                        model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
 
             rewards_in_match += reward
 
             if termination or truncation:
-                
-                # if agent not in wins:
-                #     wins[agent] = 1
-                # else:
-                #     wins[agent] +=1
-
-
 
                 print(f'WINNER: {agent}')
                 break
@@ -109,7 +110,7 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
         model.train()
         reward_avg = rewards_in_match / moves_in_match
         rewards.append(reward_avg) 
-        if (match+1) % 2 == 0:
+        if (match+1) % 2 == 0 and isinstance(model, PPO) == False:
             print('Updating target model')
             model.update_target_model()
 
