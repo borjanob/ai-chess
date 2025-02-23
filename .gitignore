@@ -3,3 +3,5 @@ __pycache__/
 todo_done.py
 trained_model_weights/
 .vscode/
+plot.py
+test.py

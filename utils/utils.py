@@ -16,13 +16,29 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
     env.reset()
     wins = dict()
+    rewards = []
+    rewards_in_match = 0
+    moves_in_match = 0
 
-    for match in range(number_of_games):    
+
+
+    for match in range(number_of_games):
+
+        rewards_in_match = 0
+        moves_in_match = 0
+        
+        env.reset()
+        previous_number_of_pieces = 32
+
+        pieces_by_type_previous = piece_nums
+        initial_state = True
+
         for agent in env.agent_iter():
 
+            piece_taken_in_move = False
             observation, reward, termination, truncation, info = env.last()
             state = observation['observation']
-
+                
             moves = observation["action_mask"]             
 
             if max(moves) == 0:
@@ -42,16 +58,64 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
 
             new_observation, reward, termination, truncation, info = env.last()    
             
+            new_state = new_observation['observation']
+
+
+            number_of_pieces_on_board, pieces_by_type = count_pieces(new_state,piece_encodings_by_number)
+
+            if number_of_pieces_on_board != previous_number_of_pieces and initial_state == False:
+                piece_taken_in_move = True
+                
+
+            if initial_state:
+                initial_state = False
+
+
+            if agent == 'player_0':
+                    
+                    moves_in_match+=1
+
+                    if piece_taken_in_move and termination == False:
+                        reward = calculate_reward(pieces_by_type_previous,pieces_by_type, rewards_by_piece)
+
+                    if termination:
+                        reward = 100
+                    if reward > 0:
+                        print(f'REWARD IS {reward}')
+
+                    # update model memory after every move
+                    model.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+
+            rewards_in_match += reward
+
             if termination or truncation:
                 
-                if agent not in wins:
-                    wins[agent] = 1
-                else:
-                    wins[agent] +=1
+                # if agent not in wins:
+                #     wins[agent] = 1
+                # else:
+                #     wins[agent] +=1
+
+
 
                 print(f'WINNER: {agent}')
                 break
-    return wins
+
+             # set previous board state to equal current state after change
+            if piece_taken_in_move:
+                previous_number_of_pieces = number_of_pieces_on_board
+                pieces_by_type_previous = pieces_by_type
+                
+        #print('match finished')
+        model.train()
+        reward_avg = rewards_in_match / moves_in_match
+        rewards.append(reward_avg) 
+        if (match+1) % 2 == 0:
+            print('Updating target model')
+            model.update_target_model()
+
+    avg_reward =  np.mean(rewards)
+
+    return avg_reward
 
 
 def play_matches(env: chess_v6, players : list, number_of_games: int = 10, logs_file_name = 'logs/matches.txt'):
@@ -194,6 +258,8 @@ def play_matches(env: chess_v6, players : list, number_of_games: int = 10, logs_
 
 
     return white_wins, black_wins
+
+
 def add_to_logs(filename, content):
 
     """

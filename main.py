@@ -3,16 +3,10 @@ from algorithms.ddqn import DDQN
 from algorithms.dqn import DQN
 from algorithms.dueling_dqn import DuelingDQN
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
-import numpy as np
+from tensorflow.keras.losses import MeanSquaredError
 from model.agent import Agent
-from pettingzoo import AECEnv
-from utils.utils import play_training_tournament, play_vs_random, calculate_reward, count_pieces,add_to_logs, play_training_tournament_with_2_agents, play_matches
+from utils.utils import play_matches
 from utils.piece_encodings_full import *
-import tensorflow as tf
-import time
-import h5py
 
 env = chess_v6.env()
 env.reset(seed=42)
