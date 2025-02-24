@@ -4,76 +4,42 @@ import numpy as np
 tfd = tfp.distributions
 from collections import deque
 import random
-
-
-class Actor(tf.keras.Model):
-    def __init__(self, input_shape, action_dim):
-        super(Actor, self).__init__()
-        # Convolutional layers for processing 8x8x111 input
-        self.conv1 = tf.keras.layers.Conv2D(32, 3, strides=2, activation='relu', input_shape=input_shape)
-        self.conv2 = tf.keras.layers.Conv2D(64, 2, strides=1, activation='relu')
-        self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(64, activation='relu')
-        
-        # Output layer for action logits
-        self.logits = tf.keras.layers.Dense(action_dim)  # No activation, outputs raw logits
-
-    def call(self, state):
-        # Forward pass
-        x = self.conv1(state)
-        x = self.conv2(x)
-        x = self.flatten(x)
-        x = self.dense(x)
-        logits = self.logits(x) 
-        return tf.nn.softmax(logits) # Outputs logits for categorical distribution
-
-class Critic(tf.keras.Model):
-    def __init__(self, input_shape):
-        super(Critic, self).__init__()
-        self.conv1 = tf.keras.layers.Conv2D(32, 3, strides=2, activation='relu', input_shape=input_shape)
-        self.conv2 = tf.keras.layers.Conv2D(64, 2, strides=1, activation='relu')
-        self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(64, activation='relu')
-        self.value = tf.keras.layers.Dense(1)
-
-    def call(self, state):
-        x = self.conv1(state)
-        x = self.conv2(x)
-        x = self.flatten(x)
-        x = self.dense(x)
-        return self.value(x)
+from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten, Dropout, ReLU, BatchNormalization
+from tensorflow.keras.models import Model,Sequential
+from model.ppo_actor import Actor
+from model.ppo_critic import Critic
 
 class PPO:
-    def __init__(self, input_shape, action_dim,
-                 clip_ratio=0.2, gamma=0.99, lam=0.95,
+    def __init__(self, input_shape, number_of_actions,
+                 clip_ratio=0.2, discount_factor=0.99, lam=0.95,
                  actor_lr=3e-4, critic_lr=1e-3, 
-                 buffer_size=10000, batch_size=64, epochs=4, memory_size = 100):
+                 batch_size=64, epochs=4, memory_size = 100, 
+                 num_of_hidden_units_actor = 128, num_of_hidden_units_critic = 128):
         
-        # Networks
-        self.actor = Actor(input_shape, action_dim)
-        self.critic = Critic(input_shape)
+    
+        self.actor = Actor(input_shape, number_of_actions, num_of_hidden_units_actor)
+        self.critic = Critic(input_shape, num_of_hidden_units_critic)
         
         self.state_space_shape = input_shape
-        self.num_actions = action_dim
-        # Optimizers
-        self.actor_optimizer = tf.keras.optimizers.Adam(actor_lr)
-        self.critic_optimizer = tf.keras.optimizers.Adam(critic_lr)
+        self.num_actions = number_of_actions
+
+        # Optimizers i vidi dali treba clipnorm ovde ili nema potreba
+        self.actor_optimizer = tf.keras.optimizers.Adam(actor_lr, clipnorm=2)
+        self.critic_optimizer = tf.keras.optimizers.Adam(critic_lr,clipnorm=2)
         
-        # Memory
+  
         self.memory = deque(maxlen=memory_size)
-        
-        # Hyperparameters
+ 
         self.clip_ratio = clip_ratio
-        self.gamma = gamma
+        self.discount_factor = discount_factor
         self.lam = lam
         self.batch_size = batch_size
         self.epochs = epochs
         self.entropy_coef = 0.01
         self.value_coef = 0.5
-        
-        # Shape information
+    
         self.input_shape = input_shape
-        self.action_dim = action_dim
+        self.action_dim = number_of_actions
 
     def update_memory(self, state, action, reward, next_state, done, log_prob):
         self.memory.append((state, action, reward, next_state, done, log_prob))
@@ -85,8 +51,8 @@ class PPO:
         
         for t in reversed(range(len(rewards))):
             mask = 1.0 - dones[t]
-            delta = rewards[t] + self.gamma * next_value * mask - values[t]
-            advantages[t] = delta + self.gamma * self.lam * mask * last_advantage
+            delta = rewards[t] + self.discount_factor * next_value * mask - values[t]
+            advantages[t] = delta + self.discount_factor * self.lam * mask * last_advantage
             last_advantage = advantages[t]
             next_value = values[t]
             
@@ -202,7 +168,11 @@ class PPO:
                 # Update networks
                 self.train_step(batch_states, batch_actions, 
                                batch_old_logprobs, batch_advantages, batch_returns)
-        
+    
+
+    def save_full_model(self, episode):
+        self.actor.save(f'ppo_actor_{episode}.h5')
+        self.critic.save(f'ppo_critic_{episode}.h5')
 
     def train_step(self, states, actions, old_logprobs, advantages, returns):
 

@@ -5,8 +5,10 @@ from algorithms.dueling_dqn import DuelingDQN
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError
 from model.agent import Agent
-from utils.utils import play_matches
+from utils.utils import play_matches, play_training_tournament, play_training_tournament_with_2_agents
 from utils.piece_encodings_full import *
+from algorithms.ppo import PPO
+import time
 
 env = chess_v6.env()
 env.reset(seed=42)
@@ -36,20 +38,25 @@ ddqn_target = Agent(number_of_actions,128)
 
 ddqn = DDQN((8,8,111),number_of_actions,ddqn_model,ddqn_target)
 
+ppo = PPO((8,8,111),number_of_actions)
+
 wins = dict()
 matches_played = 0
 illegal_moves = 0
 avg_rewards = []
-
+"""
 dqn.load('full_models/dqn_model_38.h5')
 dqn.update_target_model()
 ddqn.load('full_models/ddqn_model_38.h5')
 ddqn.update_target_model()
 dueling.load('full_models/duelingdqn_model_38.h5')
 dueling.update_target_model()
-
-models = [dqn,ddqn,dueling]
-
+"""
+models = [dqn,ddqn,dueling,ppo]
+start = time.time()
+new_models, _ = play_training_tournament_with_2_agents(models,env,1,1)
+end = time.time()
+"""
 for i in range(len(models)):
 
     for j in range(i+1,len(models)):
@@ -60,5 +67,12 @@ for i in range(len(models)):
         players = [first_agent,second_agent]
 
         white_wins, black_wins = play_matches(env,players)
+"""
+"""
+94 sec - 16 games
+5.9s - 1 game
 
+
+"""
+print( end- start)
 env.close()

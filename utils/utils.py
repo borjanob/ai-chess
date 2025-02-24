@@ -110,6 +110,7 @@ def play_vs_random(env, model: Model, number_of_games: int) -> dict:
         model.train()
         reward_avg = rewards_in_match / moves_in_match
         rewards.append(reward_avg) 
+        
         if (match+1) % 2 == 0 and isinstance(model, PPO) == False:
             print('Updating target model')
             model.update_target_model()
@@ -268,7 +269,7 @@ def add_to_logs(filename, content):
 
     Args:
         filename (str): The name of the logs file
-        content (str): The content to be added to logs
+        content ( Any ): The content to be added to logs
     """
     try:
         with open(filename, 'a') as file:
@@ -326,7 +327,7 @@ def play_training_tournament(models: list, env: chess_v6, matches_per_opponent: 
                 moves_data[model_to_train.__class__.__name__] += avg_moves
 
             if (round+1) % 2 == 0:
-                model_to_train.save('agent',round + 1)
+                model_to_train.save_full_model(round + 1)
 
         models = updated_models
         add_to_logs(logs_file_name,'')
@@ -394,10 +395,17 @@ def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6
                     if opponent == 'random':
                         action = env.action_space(agent).sample(moves)
                     else:
+
+                        if isinstance(opponent, PPO):
+                            action, probability = opponent.get_action(converted_state,0.01,moves)
+                        else:
                             action = opponent.get_action(converted_state,0.01,moves)
 
                 else:
-                    action = model_to_train.get_action(converted_state,0.01,moves)
+                    if isinstance(model_to_train, PPO):
+                        action, probability = model_to_train.get_action(converted_state,0.01,moves)
+                    else:
+                        action = model_to_train.get_action(converted_state,0.01,moves)
 
 
                 env.step(action)
@@ -417,7 +425,10 @@ def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6
 
                         # give negative reward to model being trained for illegal moves
                         reward = -50
-                        model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                        if isinstance(model_to_train, PPO):
+                            model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0, probability)
+                        else:
+                            model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
 
                     break
                         
@@ -445,14 +456,20 @@ def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6
                         print(f'REWARD IS {reward}')
 
                     # update model memory after every move
-                    model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                    if isinstance(model_to_train, PPO):
+                        model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0, probability)
+                    else:
+                        model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
                 
                 
 
                 if agent == 'player_1' and termination:
                     reward = -100
                     # give negative reward on loss
-                    model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                    if isinstance(model_to_train, PPO):
+                        model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0, probability)
+                    else:
+                        model_to_train.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
                 
                 reward_in_matches += reward
                 
@@ -475,7 +492,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6
             #print('match finished')
             model_to_train.train()
 
-            if (match+1) % episodes_for_target_update == 0:
+            if (match+1) % episodes_for_target_update == 0 and isinstance(model_to_train, PPO) == False:
                 print('Updating target model')
                 model_to_train.update_target_model()
     
@@ -514,25 +531,11 @@ def play_training_tournament_with_2_agents(models: list, env: chess_v6, matches_
        
         models = updated_models
 
-        # if model_to_train.__class__.__name__ not in rewards_data:
-        #         rewards_data[model_to_train.__class__.__name__] = avg_rewards
-        #         moves_data[model_to_train.__class__.__name__] = avg_moves
-        # else:
-        #         rewards_data[model_to_train.__class__.__name__] += avg_rewards
-        #         moves_data[model_to_train.__class__.__name__] += avg_moves
-
         if (round + 1) % 5 == 0:
                 for model in models:
                     model.save('agent', round + 21)
 
             
-
-    # for model in models:
-    #     avg_rewards_for_model = rewards_data[model_to_train.__class__.__name__] / rounds_in_tournament
-    #     avg_moves_for_model = moves_data[model_to_train.__class__.__name__] / rounds_in_tournament
-
-    #     data[model.__class__.__name__] = (avg_rewards_for_model,avg_moves_for_model)
-
     return models, data
 
 
@@ -603,11 +606,17 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
                         
                         if opponent == 'random':
                             action = env.action_space(agent).sample(moves)
-                        else:
+                        else:     
+                            if isinstance(opponent, PPO):
+                                action, probability = opponent.get_action(converted_state,0.01,moves)
+                            else:
                                 action = opponent.get_action(converted_state,0.01,moves)
 
                     else:
-                        action = white_player.get_action(converted_state,0.01,moves)
+                        if isinstance(white_player, PPO):
+                            action, probability = white_player.get_action(converted_state,0.01,moves)
+                        else:
+                            action = white_player.get_action(converted_state,0.01,moves)
 
 
                     env.step(action)
@@ -624,12 +633,20 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
                         
                         matches_ended_in_illegal_moves +=1
                         print(f'{agent} made illegal move, terminating game')
-
+                        reward = -50
                         if agent == 'player_0':
-
                             # give negative reward to model being trained for illegal moves
-                            reward = -50
-                            white_player.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                            
+                            if isinstance(white_player, PPO):
+                                white_player.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0,probability)
+                            else:
+                                white_player.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                            #white_player.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
+                        else:
+                            if isinstance(opponent, PPO):
+                                opponent.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0,probability)
+                            else:
+                                opponent.update_memory(state,action,reward,new_state, 1 if termination or truncation else 0)
 
                         break
                             
@@ -659,10 +676,18 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
 
                             # give negative reward to opponent on loss or lost piece
                             if opponent != 'random':
-                                opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
+                                if isinstance(opponent, PPO):
+                                    opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0,probability)
+                                else:
+                                    opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
+                                #opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
 
                         # update model memory after every move
-                        white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
+                        if isinstance(white_player, PPO):
+                            white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0,probability)
+                        else:
+                            white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
+                        #white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
                     
                     
 
@@ -679,13 +704,21 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
                             reward_for_white = 0 - reward_for_black
                             
                             # give negative reward to opponent on loss or lost piece
-                            white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
+                            if isinstance(white_player, PPO):
+                                white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0,probability)
+                            else:
+                                white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
+                            #white_player.update_memory(state,action,reward_for_white,new_state, 1 if termination or truncation else 0)
 
                         # update model memory after every move
 
                         if opponent != 'random':
+                            if isinstance(opponent, PPO):
+                                opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0,probability)
+                            else:
+                                opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
 
-                            opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
+                            #opponent.update_memory(state,action,reward_for_black,new_state, 1 if termination or truncation else 0)
 
                     reward_in_matches += reward_for_white if reward_for_white > reward_for_black else reward_for_black
                     
@@ -708,14 +741,14 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
                 #print('match finished')
                 white_player.train()
 
-                if opponent != 'random':
+                if opponent != 'random' and isinstance(opponent, PPO) == False:
                     opponent.train()
 
-                if match % episodes_for_target_update == 0:
+                if (match % episodes_for_target_update) == 0 and isinstance(white_player, PPO) == False:
                     print('Updating both agents')
                     white_player.update_target_model()
 
-                    if opponent != 'random':
+                    if opponent != 'random' and isinstance(opponent, PPO) == False:
                         opponent.update_target_model()  
         
         
@@ -733,9 +766,9 @@ def _play_tournament_round_update_2_agents(models: list, env: chess_v6,round:int
 
         add_to_logs(logs_file_name,info_for_round)  
 
-        #models = [x for x in models if x != 'random']
-        if add_random_opponent:
-            models.remove('random')
+    
+    if add_random_opponent:
+        models.remove('random')
 
     return models
 

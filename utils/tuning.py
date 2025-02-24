@@ -1,17 +1,14 @@
 from pettingzoo.classic import chess_v6
-from pettingzoo.utils.conversions import aec_to_parallel
 from model.agent import Agent
 from algorithms.dqn import DQN
 from algorithms.ddqn import DDQN
 from algorithms.dueling_dqn import DuelingDQN
 from tensorflow.keras.optimizers import Adam,SGD
-from tensorflow.keras.losses import MeanSquaredError, MeanAbsoluteError 
+from tensorflow.keras.losses import MeanSquaredError
 import optuna
 from utils.utils import play_vs_random
-
-from sklearn.model_selection import cross_val_score
-
-
+from algorithms.ppo import PPO
+from utils.utils import add_to_logs
 
 def objective_dqn(trial):
 
@@ -69,7 +66,6 @@ def objective_ddqn(trial):
     return score
 
 
-# TODO: FIX OBJECTIVE FUNC FOR DUELING DQN
 def objective_dueling(trial):
 
     learning_rate = trial.suggest_float('lr', 0.000001,0.00001)
@@ -99,6 +95,32 @@ def objective_dueling(trial):
 
 
 
+def objective_ppo(trial):
+
+    learning_rate_actor = trial.suggest_float('lr_actor', 0.000001,0.0001)
+    learning_rate_critic = trial.suggest_float('lr_critic', 0.000001,0.0001)
+    batch_size = trial.suggest_int('batch_size', 16,64, 8)
+    discount_factor = trial.suggest_float('discount_factor', 0.85,0.99)
+    hidden_units_actor = trial.suggest_int('hidden_units_actor', 128,512, 32)
+    hidden_units_critic = trial.suggest_int('hidden_units_critic', 128,512, 32)
+    epochs = trial.suggest_int('epochs', 3,10)
+    #optimizers = trial.suggest_categorical('optimizer',[Adam, SGD])
+    
+
+    env = chess_v6.env()
+    env.reset(seed=42)
+
+    number_of_actions = 4672
+    
+    ppo = PPO((8,8,111), number_of_actions,discount_factor=discount_factor, actor_lr= learning_rate_actor, critic_lr= learning_rate_critic,
+              batch_size=batch_size, num_of_hidden_units_actor = hidden_units_actor, num_of_hidden_units_critic = hidden_units_critic,  
+              epochs=epochs)
+    
+    score = play_vs_random(env,ppo,1)
+
+    return score
+
+
 
 def get_best_params(algorithms, number_of_trials) -> dict:
 
@@ -121,16 +143,13 @@ def get_best_params(algorithms, number_of_trials) -> dict:
                 study.optimize(objective_ddqn, n_trials=number_of_trials)
         elif algorithm == 'dueling':
                 study.optimize(objective_dueling, n_trials=number_of_trials)
-        #elif algorithm =='ppo':
-        #        study.optimize(objective_ppo, n_trials=number_of_trials)
-        
-        #study.optimize(objective, n_trials=10)
-
+        elif algorithm =='ppo':
+                study.optimize(objective_ppo, n_trials=number_of_trials)
         best_params[algorithm] = study.best_params
     
+    add_to_logs(f"logs/best_hyperparameters_{number_of_trials}_number_of_trials", best_params)
+
     return best_params
-
-
 
 
 
@@ -138,7 +157,10 @@ def get_best_params(algorithms, number_of_trials) -> dict:
 
 if __name__ == "__main__":
 
+    """
     study = optuna.create_study(direction='maximize', sampler=optuna.samplers.RandomSampler(seed=42))
     study.optimize(objective, n_trials=10)
-
-    print(study.best_params)
+    """
+    algorithms = ["dqn","ddqn", "dueling", "ppo"] 
+    best_params = get_best_params(algorithms, 10)
+    print(best_params)

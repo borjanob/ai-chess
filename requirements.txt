@@ -4,7 +4,6 @@ chess
 tensorflow
 numpy
 pygame
-stable-baselines3
 optuna
 supersuit
 tensorflow-probability

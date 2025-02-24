@@ -1,2 +1,2 @@
 # AI - Chess
-Repository for training AI agents to play chess using reinforcement learning and Tensorflow. Agents are trained on the chess env from pettingzoo. DQN, DDQN and Dueling DQN agents are available
+Repository for training AI agents to play chess using reinforcement learning and Tensorflow. Agents are trained on the chess env from pettingzoo. DQN, DDQN, Dueling DQN and PPO agents are available and ready for use

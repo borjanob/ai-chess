@@ -81,3 +81,9 @@ Model = DuelingDQN, Round = 18, won 26 games out of 60, average number of moves 
 
 Model = DDQN, Round = 19, won 53 games out of 60, average number of moves per win in this round = 38.583333333333336, average reward per move in this round= 2.9503239740820733 
 Model = DuelingDQN, Round = 19, won 22 games out of 60, average number of moves per win in this round = 61.1, average reward per move in this round= 2.1721222040370978 
+
+
+Model = DuelingDQN, Round = 1, won 2 games out of 4, average number of moves per win in this round = 54.75, average reward per move in this round= 2.502283105022831 
+Model = PPO, Round = 1, won 4 games out of 4, average number of moves per win in this round = 119.25, average reward per move in this round= 2.5241090146750524 
+Model = DQN, Round = 1, won 7 games out of 4, average number of moves per win in this round = 172.0, average reward per move in this round= 2.5755813953488373 
+Model = DDQN, Round = 1, won 9 games out of 4, average number of moves per win in this round = 277.25, average reward per move in this round= 2.1442741208295764 
