@@ -10,7 +10,7 @@ from utils.utils import play_vs_random
 from algorithms.ppo import PPO
 from utils.utils import add_to_logs
 import matplotlib.pyplot as plt
-
+from pathlib import Path
 """
 def get_optimizable_params(algorithm) -> []:
 
@@ -137,25 +137,27 @@ def objective_ppo(trial):
 
 def visualize_tuning(study: optuna.study,algorithm, params: list = None) -> None:
 
+    figs = []
     if algorithm == 'ppo':  
         fig = optuna.visualization.plot_timeline(study)
-        fig.show()
-        #fig.savefig('test_fig.png')
-        
-    fig = optuna.visualization.plot_edf(study)
-    fig.show()
-    plt = optuna.visualization.plot_optimization_history(study)
-    plt.show()
-
-    plt = optuna.visualization.plot_param_importances(study)
-    plt.show()
+        figs.append(fig)
+    fig2 = optuna.visualization.plot_edf(study)
+    figs.append(fig2)
+    fig3 = optuna.visualization.plot_optimization_history(study)
+    figs.append(fig3)
+    fig4 = optuna.visualization.plot_param_importances(study)
+    figs.append(fig4)
     if params:
-        fig = optuna.visualization.plot_rank(study,params = params)
-        fig.show()
+        fig5 = optuna.visualization.plot_rank(study,params = params)
+        figs.append(fig5)
         if algorithm == 'ppo':
-            plt = optuna.visualization.plot_slice(study, params = params)
-            plt.show()
-    
+            fig6 = optuna.visualization.plot_slice(study, params = params)
+            figs.append(fig6)
+
+    with Path(f"{algorithm}.html").open("w") as fi:
+        for f in figs:
+            fi.write(f.to_html())
+
 def find_best_params(algorithms, number_of_trials, visualizations = None) -> dict:
 
     """
