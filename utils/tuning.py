@@ -9,7 +9,20 @@ import optuna
 from utils.utils import play_vs_random
 from algorithms.ppo import PPO
 from utils.utils import add_to_logs
+import matplotlib.pyplot as plt
 
+"""
+def get_optimizable_params(algorithm) -> []:
+
+    if algorithm == 'dqn':
+        return ['lr','batch_size','discount_factor']
+    if algorithm == 'ddqn':
+                study.optimize(objective_ddqn, n_trials=number_of_trials)
+    if algorithm == 'dueling':
+                study.optimize(objective_dueling, n_trials=number_of_trials)
+    if algorithm =='ppo':
+                study.optimize(objective_ppo, n_trials=number_of_trials)
+"""
 def objective_dqn(trial):
 
     learning_rate = trial.suggest_float('lr', 0.000001,0.00001)
@@ -66,6 +79,8 @@ def objective_ddqn(trial):
     return score
 
 
+
+
 def objective_dueling(trial):
 
     learning_rate = trial.suggest_float('lr', 0.000001,0.00001)
@@ -120,14 +135,35 @@ def objective_ppo(trial):
 
     return score
 
+def visualize_tuning(study: optuna.study,algorithm, params: list = None) -> None:
 
+    if algorithm == 'ppo':  
+        fig = optuna.visualization.plot_timeline(study)
+        fig.show()
+        #fig.savefig('test_fig.png')
+        
+    fig = optuna.visualization.plot_edf(study)
+    fig.show()
+    plt = optuna.visualization.plot_optimization_history(study)
+    plt.show()
 
-def get_best_params(algorithms, number_of_trials) -> dict:
+    plt = optuna.visualization.plot_param_importances(study)
+    plt.show()
+    if params:
+        fig = optuna.visualization.plot_rank(study,params = params)
+        fig.show()
+        if algorithm == 'ppo':
+            plt = optuna.visualization.plot_slice(study, params = params)
+            plt.show()
+    
+def find_best_params(algorithms, number_of_trials, visualizations = None) -> dict:
 
     """
-
-    Function that uses optuna library to find the best hyperparameters
-    to use with the DQN, DDQN, Dueling DQN and PPO algorithms for use with chess
+    Function that uses optuna library to find the best hyperparameters for passed models
+    Params:
+    algorithms: [] - algorithms that need hyperparameters found
+    number_of_tirals: int - number of trials per opmiziation
+    games_per_trial: int - number of games played in each optimization trial
 
     """
 
@@ -138,29 +174,22 @@ def get_best_params(algorithms, number_of_trials) -> dict:
         study = optuna.create_study(direction='maximize', sampler=optuna.samplers.RandomSampler(seed=42))
 
         if algorithm == 'dqn':
-                study.optimize(objective_dqn, n_trials=number_of_trials)
+            study.optimize(objective_dqn, n_trials=number_of_trials)
         elif algorithm == 'ddqn':
-                study.optimize(objective_ddqn, n_trials=number_of_trials)
+            study.optimize(objective_ddqn, n_trials=number_of_trials)
         elif algorithm == 'dueling':
-                study.optimize(objective_dueling, n_trials=number_of_trials)
+            study.optimize(objective_dueling, n_trials=number_of_trials)
         elif algorithm =='ppo':
-                study.optimize(objective_ppo, n_trials=number_of_trials)
+            study.optimize(objective_ppo, n_trials=number_of_trials)
+               
+        params = list(study.best_params.keys())
+        
+        visualize_tuning(study,algorithm,params = params)
         best_params[algorithm] = study.best_params
     
-    add_to_logs(f"logs/best_hyperparameters_{number_of_trials}_number_of_trials", best_params)
+    add_to_logs(f"logs/best_hyperparameters_{number_of_trials}_number_of_trials.txt", best_params)
 
     return best_params
 
 
 
-
-
-if __name__ == "__main__":
-
-    """
-    study = optuna.create_study(direction='maximize', sampler=optuna.samplers.RandomSampler(seed=42))
-    study.optimize(objective, n_trials=10)
-    """
-    algorithms = ["dqn","ddqn", "dueling", "ppo"] 
-    best_params = get_best_params(algorithms, 10)
-    print(best_params)

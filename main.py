@@ -54,7 +54,8 @@ dueling.update_target_model()
 """
 models = [dqn,ddqn,dueling,ppo]
 start = time.time()
-new_models, _ = play_training_tournament_with_2_agents(models,env,1,1)
+new_models, _ = play_training_tournament_with_2_agents(models,env,1,1,1)
+#new_models, _ = play_training_tournament(models,env,2,1,2)
 end = time.time()
 """
 for i in range(len(models)):

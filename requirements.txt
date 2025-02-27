@@ -7,3 +7,4 @@ pygame
 optuna
 supersuit
 tensorflow-probability
+kaleido
