@@ -163,7 +163,7 @@ class PPO:
         self.critic.save(f'ppo_critic_{episode}', save_format = "tf")
 
     def load_full_model(self, path_to_model):
-        self.model = load_model(path_to_model)
+        self.actor = load_model(path_to_model)
 
 
     def train_step(self, states, actions, old_logprobs, advantages, returns):

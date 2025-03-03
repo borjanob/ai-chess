@@ -1,16 +1,20 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten, Dropout, ReLU, BatchNormalization
-from tensorflow.keras.models import Model,Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow.keras import Model
-from tensorflow.nn import softmax
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
+from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten
+from tensorflow.keras.models import Sequential
+
 
 
 class Actor(tf.keras.Model):
-    def __init__(self, input_shape, action_dim, num_of_hidden_units = 128):
+    def __init__(self, input_shape: int, num_of_actions, num_of_hidden_units = 128):
         super(Actor, self).__init__()
+
+        self.input_shp = input_shape
+
+        self.num_of_actions = num_of_actions
+
+        self.num_of_hidden_units = num_of_hidden_units
+
+
         # Convolutional layers for processing 8x8x111 input
         self.conv1 = tf.keras.layers.Conv2D(num_of_hidden_units, 3, strides=2, activation='relu', input_shape=input_shape)
 
@@ -39,7 +43,7 @@ class Actor(tf.keras.Model):
         self.dense = tf.keras.layers.Dense(64, activation='relu')
         
         # Output layer for action logits
-        self.logits = tf.keras.layers.Dense(action_dim)  # No activation, outputs raw logits
+        self.logits = tf.keras.layers.Dense(num_of_actions)  # No activation, outputs raw logits
 
     def call(self, state):
         # Forward pass
@@ -50,3 +54,19 @@ class Actor(tf.keras.Model):
         x = self.dense(x)
         logits = self.logits(x) 
         return tf.nn.softmax(logits) # Outputs logits for categorical distribution
+    
+    def get_config(self):
+
+        base = super().get_config()
+
+        config = {
+            
+            "input_shape": self.input_shp,
+            "num_of_actions": self.num_of_actions,
+            "num_of_hidden_units": self.num_of_hidden_units
+
+        }
+
+        return {**base, **config}
+    
+

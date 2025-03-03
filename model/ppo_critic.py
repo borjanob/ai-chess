@@ -1,12 +1,15 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten, Dropout, ReLU, BatchNormalization
-from tensorflow.keras.models import Model,Sequential
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten
+from tensorflow.keras.models import Sequential
 
 
 class Critic(tf.keras.Model):
-    def __init__(self, input_shape, num_of_hidden_units = 128):
+    def __init__(self, input_shape: int, num_of_hidden_units = 128):
         super(Critic, self).__init__()
+
+        self.input_shp = input_shape
+        self.num_of_hidden_units = num_of_hidden_units
+
         self.conv1 = tf.keras.layers.Conv2D(32, 3, strides=2, activation='relu', input_shape=input_shape)
 
         self.conv2 = Sequential(
@@ -41,3 +44,17 @@ class Critic(tf.keras.Model):
         x = self.flatten(x)
         x = self.dense(x)
         return self.value(x)
+    
+
+    def get_config(self):
+
+        base = super().get_config()
+
+        config = {
+            
+            "input_shape": self.input_shp,
+            "num_of_hidden_units": self.num_of_hidden_units
+
+        }
+
+        return {**base, **config}

@@ -1,10 +1,7 @@
-from tensorflow.keras.layers import Input, Dense, Concatenate, Conv2D, Flatten, MaxPooling2D, Dropout, ReLU, BatchNormalization
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, ReLU, BatchNormalization
 from tensorflow.keras.models import Model,Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
 from tensorflow.keras import Model
-from tensorflow.nn import softmax
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, float32, GradientTape
+
 
 
 class Agent(Model):
@@ -17,8 +14,12 @@ class Agent(Model):
     number_of_hidden_units: the number of hidden units in the neural net
     """
 
-    def __init__(self,number_of_outputs,number_of_hidden_units):
+    def __init__(self,number_of_outputs: int,number_of_hidden_units: int):
         super(Agent,self).__init__()
+
+        self.number_of_outputs = number_of_outputs
+
+        self.number_of_hidden_units = number_of_hidden_units
 
         self.first_block = Sequential(
             [
@@ -62,3 +63,13 @@ class Agent(Model):
         x = self.prediction_block(x)
 
         return x
+    
+
+    def get_config(self):
+        base_config = super().get_config()
+
+        config = {
+            "number_of_outputs": self.number_of_outputs,
+            "number_of_hidden_units" :self.number_of_hidden_units
+        }
+        return {**base_config, **config} 

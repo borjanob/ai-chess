@@ -50,23 +50,26 @@ avg_rewards = []
 
 zeros = tf.zeros((1,8,8,111), dtype=float32)
 
-"""
-dqn.load('full_models/dqn_model_38.h5')
-dqn.update_target_model()
-ddqn.load('full_models/ddqn_model_38.h5')
-ddqn.update_target_model()
-dueling.load('full_models/duelingdqn_model_38.h5')
-dueling.update_target_model()
-"""
-
 models = [dqn,ddqn,dueling,ppo]
 start = time.time()
-new_models, _ = play_training_tournament(models,env,1,1,1,save_models_time=1)
+#new_models, _ = play_training_tournament(models,env,1,1,1,save_models_time=1)
 print('STOP')
-#dqn.save_full_model(1)
-#ddqn.save_full_model(1)
-#dueling.save_full_model(1)
-#ppo.save_full_model(1)
+
+dqn.model.predict(zeros)
+ddqn.model.predict(zeros)
+ppo.actor.predict(zeros)
+ppo.critic.predict(zeros)
+dueling.model.predict(zeros)
+"""
+dqn.save_full_model(1)
+ddqn.save_full_model(1)
+dueling.save_full_model(1)
+ppo.save_full_model(1)
+"""
+dqn.load_full_model('dqn_model_1')
+ddqn.load_full_model('ddqn_model_1')
+dueling.load_full_model('duelingdqn_model_1')
+ppo.load_full_model('ppo_actor_1')
 
 #new_models, _ = play_training_tournament(models,env,2,1,2)
 end = time.time()
