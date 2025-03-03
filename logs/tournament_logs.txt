@@ -83,3 +83,6 @@ Model = DQN, Round = 19, won 15 games out of 60, average number of moves per win
 ======================= 4 agents ================================
 
 
+
+Model = DuelingDQN, Round = 0, won 2 games out of 4, average number of moves per win in this round = 61.0, average reward per move in this round= 0.3319672131147541 
+Model = PPO, Round = 0, won 3 games out of 4, average number of moves per win in this round = 39.0, average reward per move in this round= 1.7692307692307692 

@@ -90,3 +90,8 @@ Model = DDQN, Round = 1, won 9 games out of 4, average number of moves per win i
 
 ================= 4 MODELS ======================
 
+
+Model = DQN, Round = 1, won 1 games out of 4, average number of moves per win in this round = 56.5, average reward per move in this round= -1.1106194690265487 
+Model = DDQN, Round = 1, won 1 games out of 4, average number of moves per win in this round = 70.5, average reward per move in this round= -0.5780141843971631 
+Model = DuelingDQN, Round = 1, won 3 games out of 4, average number of moves per win in this round = 53.5, average reward per move in this round= 1.1214953271028036 
+Model = PPO, Round = 1, won 2 games out of 4, average number of moves per win in this round = 67.25, average reward per move in this round= -0.10408921933085502 

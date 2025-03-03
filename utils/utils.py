@@ -284,7 +284,7 @@ def add_to_logs(filename, content):
 
 
 def play_training_tournament(models: list, env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'logs/tournament_logs.txt' ):
+        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponents: bool = True, logs_file_name = 'logs/tournament_logs.txt', save_models_time = 2 ):
     
 
     """
@@ -326,7 +326,7 @@ def play_training_tournament(models: list, env: chess_v6, matches_per_opponent: 
                 rewards_data[model_to_train.__class__.__name__] += avg_rewards
                 moves_data[model_to_train.__class__.__name__] += avg_moves
 
-            if (round+1) % 2 == 0:
+            if (round+1) % save_models_time == 0:
                 model_to_train.save_full_model(round + 1)
 
         models = updated_models
@@ -533,7 +533,7 @@ def play_training_tournament_with_2_agents(models: list, env: chess_v6, matches_
 
         if (round + 1) % 5 == 0:
                 for model in models:
-                    model.save('agent', round + 21)
+                    model.save_full_model('agent', round + 21)
 
             
     return models, data

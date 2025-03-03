@@ -1,11 +1,8 @@
 import numpy as np
 import random
 from collections import deque
-from tensorflow.keras.layers import Input, Dense, Concatenate,Flatten,Layer
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, GradientTape, float32
+from tensorflow.keras.models import load_model
+from tensorflow import float32
 import tensorflow as tf
 
 class DDQN:
@@ -122,6 +119,11 @@ class DDQN:
         if update_target_model:
             self.target_model.predict(zeros)
             self.target_model.load_weights(path_to_weights)
+
+    def load_full_model(self, path_to_model):
+
+        self.model = load_model(path_to_model)
+
 
     def save_full_model(self, episode):
         self.model.save(f'ddqn_model_{episode}.h5')

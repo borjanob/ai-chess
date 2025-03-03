@@ -9,6 +9,8 @@ from utils.utils import play_matches, play_training_tournament, play_training_to
 from utils.piece_encodings_full import *
 from algorithms.ppo import PPO
 import time
+import tensorflow as tf
+from tensorflow import float32
 
 env = chess_v6.env()
 env.reset(seed=42)
@@ -40,10 +42,14 @@ ddqn = DDQN((8,8,111),number_of_actions,ddqn_model,ddqn_target)
 
 ppo = PPO((8,8,111),number_of_actions)
 
+
 wins = dict()
 matches_played = 0
 illegal_moves = 0
 avg_rewards = []
+
+zeros = tf.zeros((1,8,8,111), dtype=float32)
+
 """
 dqn.load('full_models/dqn_model_38.h5')
 dqn.update_target_model()
@@ -52,9 +58,16 @@ ddqn.update_target_model()
 dueling.load('full_models/duelingdqn_model_38.h5')
 dueling.update_target_model()
 """
+
 models = [dqn,ddqn,dueling,ppo]
 start = time.time()
-new_models, _ = play_training_tournament_with_2_agents(models,env,1,1,1)
+new_models, _ = play_training_tournament(models,env,1,1,1,save_models_time=1)
+print('STOP')
+#dqn.save_full_model(1)
+#ddqn.save_full_model(1)
+#dueling.save_full_model(1)
+#ppo.save_full_model(1)
+
 #new_models, _ = play_training_tournament(models,env,2,1,2)
 end = time.time()
 """

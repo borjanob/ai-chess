@@ -1,19 +1,16 @@
 import numpy as np
 import random
 from collections import deque
-from tensorflow.keras.layers import Input, Dense, Concatenate,Flatten,Layer
-from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense,Layer
+from tensorflow.keras.models import Model,load_model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, GradientTape, float32
-import tensorflow
+from tensorflow.keras.losses import MeanSquaredError
+from tensorflow import reduce_mean
 
 
 class ReduceMeanLayer(Layer):
     def call(self, inputs):
         return reduce_mean(inputs, axis=1, keepdims=True)
-
-
 
 class DuelingDQN:
     def __init__(self, state_space_shape, num_actions,layers, learning_rate=0.1,
@@ -160,6 +157,9 @@ class DuelingDQN:
         """
         self.model.save_weights(f'duelingdqn_{model_name}_{episode}.weights.h5')
     
+    def load_full_model(self, path):
+        self.model = load_model(path)
+
     def save_full_model(self, episode):
         self.model.save(f'duelingdqn_model_{episode}.h5')
 

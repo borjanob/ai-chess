@@ -1,13 +1,9 @@
 import numpy as np
 import random
 from collections import deque
-from tensorflow.keras.layers import Input, Dense, Concatenate,Flatten,Layer
-from tensorflow.keras.models import Model,load_model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import MeanSquaredError, MSE
-from tensorflow import reduce_mean, convert_to_tensor, squeeze, GradientTape, float32
+from tensorflow.keras.models import load_model
+from tensorflow import float32
 import tensorflow as tf
-from model.agent import Agent
 #tf.keras.models.load_model('my_model.keras')
 
 class DQN:
@@ -110,10 +106,10 @@ class DQN:
 
     def load_full_model(self, path_to_model):
 
-        self.model = load_model(path_to_model, )
+        self.model = load_model(path_to_model)
 
 
-    def load(self, path_to_weights, update_target_model = True):
+    def load_weights(self, path_to_weights, update_target_model = True):
         """
         Loads the weights of the model at specified episode checkpoint.
         :param model_name: name of the model
@@ -138,7 +134,7 @@ class DQN:
         self.model.save_weights(f'dqn_{model_name}_{episode}.weights.h5')
 
     def save_full_model(self, episode):
-        self.model.save(f'dqn_model_{episode}.h5')
+        self.model.save(f'dqn_model_{episode}', save_format = "tf")
 
     def train(self):
         """

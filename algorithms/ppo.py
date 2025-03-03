@@ -4,8 +4,7 @@ import numpy as np
 tfd = tfp.distributions
 from collections import deque
 import random
-from tensorflow.keras.layers import Conv2D, MaxPooling2D,Flatten, Dropout, ReLU, BatchNormalization
-from tensorflow.keras.models import Model,Sequential
+from tensorflow.keras.models import load_model
 from model.ppo_actor import Actor
 from model.ppo_critic import Critic
 
@@ -103,17 +102,6 @@ class PPO:
             else:
                 state = state.reshape(1, self.state_space_shape)
 
-
-            # SE MNOZI SO ACTION MASK ZA DA SE NAPRAT 0 TIE AKCII SO NE SE LEGALNI
-            # A DA SI OSTANAT x1 TIE SO SE LEGAL
-
-            
-
-            # MULTIPLY WITH ACTION MASK
-            # legal_moves = [a*b for a,b in zip(full_predictions,action_mask)]
-
-            # final_moves = [x if x != 0.0 or x != -0.0 else -np.inf for x in legal_moves]
-
             legal_moves = self._get_legal_moves(full_predictions,action_mask)
             print(max(legal_moves))
             action_to_select = np.argmax(legal_moves)
@@ -171,8 +159,12 @@ class PPO:
     
 
     def save_full_model(self, episode):
-        self.actor.save(f'ppo_actor_{episode}.h5')
-        self.critic.save(f'ppo_critic_{episode}.h5')
+        self.actor.save(f'ppo_actor_{episode}', save_format = "tf")
+        self.critic.save(f'ppo_critic_{episode}', save_format = "tf")
+
+    def load_full_model(self, path_to_model):
+        self.model = load_model(path_to_model)
+
 
     def train_step(self, states, actions, old_logprobs, advantages, returns):
 
