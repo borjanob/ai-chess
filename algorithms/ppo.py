@@ -158,12 +158,19 @@ class PPO:
                                batch_old_logprobs, batch_advantages, batch_returns)
     
 
-    def save_full_model(self, episode):
-        self.actor.save(f'ppo_actor_{episode}', save_format = "tf")
-        self.critic.save(f'ppo_critic_{episode}', save_format = "tf")
+    def save_full_model(self, episode, save_critic = True):
 
-    def load_full_model(self, path_to_model):
-        self.actor = load_model(path_to_model)
+        self.actor.save(f'ppo_actor_{episode}', save_format = "tf")
+
+        if save_critic:
+            self.critic.save(f'ppo_critic_{episode}', save_format = "tf")
+
+    def load_full_models(self, path_to_actor, critic_path = ''):
+
+        self.actor = load_model(path_to_actor)
+
+        if critic_path != '':
+            self.critic = load_model(critic_path)
 
 
     def train_step(self, states, actions, old_logprobs, advantages, returns):

@@ -11,6 +11,7 @@ from algorithms.ppo import PPO
 from utils.utils import add_to_logs
 import matplotlib.pyplot as plt
 from pathlib import Path
+
 """
 def get_optimizable_params(algorithm) -> []:
 
@@ -45,7 +46,7 @@ def objective_dqn(trial):
 
     dqn = DQN((8,8,111),number_of_actions,dqn_model,dqn_target,batch_size=batch_size,discount_factor=discount_factor)
 
-    score = play_vs_random(env,dqn,1)
+    score = play_vs_random(env,dqn,4)
 
     return score
 
@@ -74,7 +75,7 @@ def objective_ddqn(trial):
 
     ddqn = DDQN((8,8,111),number_of_actions,ddqn_model,ddqn_target,batch_size=batch_size,discount_factor=discount_factor)
 
-    score = play_vs_random(env,ddqn,1)
+    score = play_vs_random(env,ddqn,4)
 
     return score
 
@@ -104,7 +105,7 @@ def objective_dueling(trial):
     dueling = DuelingDQN((8,8,111),number_of_actions,layers,batch_size=batch_size,discount_factor=discount_factor)
 
 
-    score = play_vs_random(env,dueling,1)
+    score = play_vs_random(env,dueling,4)
 
     return score
 
@@ -131,11 +132,11 @@ def objective_ppo(trial):
               batch_size=batch_size, num_of_hidden_units_actor = hidden_units_actor, num_of_hidden_units_critic = hidden_units_critic,  
               epochs=epochs)
     
-    score = play_vs_random(env,ppo,1)
+    score = play_vs_random(env,ppo,4)
 
     return score
 
-def visualize_tuning(study: optuna.study,algorithm, params: list = None) -> None:
+def visualize_tuning(study: optuna.study,algorithm, params: list = None, number_of_trials = 1) -> None:
 
     figs = []
     if algorithm == 'ppo':  
@@ -154,7 +155,7 @@ def visualize_tuning(study: optuna.study,algorithm, params: list = None) -> None
             fig6 = optuna.visualization.plot_slice(study, params = params)
             figs.append(fig6)
 
-    with Path(f"{algorithm}.html").open("w") as fi:
+    with Path(f"{algorithm}_{number_of_trials}.html").open("w") as fi:
         for f in figs:
             fi.write(f.to_html())
 
@@ -186,11 +187,10 @@ def find_best_params(algorithms, number_of_trials, visualizations = None) -> dic
                
         params = list(study.best_params.keys())
         
-        visualize_tuning(study,algorithm,params = params)
+        add_to_logs(f"logs/best_hyperparameters_{number_of_trials}_number_of_trials.txt",f"{algorithm}: {study.best_params}" )
         best_params[algorithm] = study.best_params
-    
+        visualize_tuning(study,algorithm,params = params, number_of_trials = number_of_trials)
     add_to_logs(f"logs/best_hyperparameters_{number_of_trials}_number_of_trials.txt", best_params)
-
     return best_params
 
 

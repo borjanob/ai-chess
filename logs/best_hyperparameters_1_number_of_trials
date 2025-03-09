@@ -1,5 +1,0 @@
-
-{'dqn': {'lr': 4.370861069626262e-06, 'batch_size': 64, 'discount_factor': 0.9524791518535967, 'hidden_units': 352, 'optimizer': <class 'keras.optimizers.optimizer_v2.adam.Adam'>}, 
-'ddqn': {'lr': 4.370861069626262e-06, 'batch_size': 64, 'discount_factor': 0.9524791518535967, 'hidden_units': 352, 'optimizer': <class 'keras.optimizers.optimizer_v2.adam.Adam'>}, 
-'dueling': {'lr': 4.370861069626262e-06, 'batch_size': 64, 'discount_factor': 0.9524791518535967, 'hidden_units': 352, 'optimizer': <class 'keras.optimizers.optimizer_v2.adam.Adam'>}, 
-'ppo': {'lr_actor': 3.8079471765888886e-05, 'lr_critic': 9.512071633458171e-05, 'batch_size': 56, 'discount_factor': 0.9338121877875851, 'hidden_units_actor': 192, 'hidden_units_critic': 192, 'epochs': 3}}

@@ -1,0 +1,8 @@
+
+ppo: {'lr_actor': 6.99014464032761e-05, 'lr_critic': 4.148634149701272e-05,
+'batch_size': 24, 
+'discount_factor': 0.871901185973952, 
+'hidden_units_actor': 224, 
+'hidden_units_critic': 352, 
+'epochs': 8}
+0.0000699014464032761,0.00004148634149701272

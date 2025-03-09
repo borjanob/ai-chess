@@ -5,3 +5,5 @@ trained_model_weights/
 .vscode/
 plot.py
 test.py
+save_models.py
+envs/

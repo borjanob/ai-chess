@@ -1,0 +1,27 @@
+
+dqn: {'lr': 1.3094966900369656e-06, 
+'batch_size': 64, 
+'discount_factor': 0.8862291974240023,
+ 'hidden_units': 384, 
+ 'optimizer': <class 'keras.src.optimizers.sgd.SGD'>}
+dqn = 0.0000013094966900369656
+
+
+ddqn = 0.000005104629857953323
+ddqn: {'lr': 5.104629857953323e-06, 
+'batch_size': 56, 
+'discount_factor': 0.8779543295021703,
+ 'hidden_units': 320, 
+ 'optimizer': <class 'keras.src.optimizers.adam.Adam'>}
+
+
+dueling: {'lr': 8.266961396476564e-06,
+ 'batch_size': 64,
+  'discount_factor': 0.894520486496061, 
+  'hidden_units': 160, 
+  'optimizer': <class 'keras.src.optimizers.sgd.SGD'>}
+dueling = 0.000008266961396476564
+
+
+{'ppo': {'lr_actor': 9.76075770314003e-06, 'lr_critic': 2.0402303379495376e-05, 'batch_size': 16, 'discount_factor': 0.895546246306857, 'hidden_units_actor': 288, 'hidden_units_critic': 224, 'epochs': 9}, 
+'dueling': {'lr': 8.266961396476564e-06, 'batch_size': 64, 'discount_factor': 0.894520486496061, 'hidden_units': 160, 'optimizer': <class 'keras.src.optimizers.sgd.SGD'>}}

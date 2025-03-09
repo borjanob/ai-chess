@@ -202,10 +202,21 @@ def play_matches(env: chess_v6, players : list, number_of_games: int = 10, logs_
             converted_state = np.array(expanded_state, dtype=float)
 
             if agent == 'player_1':
-                action = black_player.get_action(converted_state,0.1,moves)
+
+                if isinstance(black_player, PPO):
+                    action, probability = black_player.get_action(converted_state,0.01,moves)
+                else:
+
+                    action = black_player.get_action(converted_state,0.01,moves)
+                #action = black_player.get_action(converted_state,0.1,moves)
 
             else:
-                action = white_player.get_action(converted_state,0.1,moves)
+                if isinstance(white_player, PPO):
+                    action, probability = white_player.get_action(converted_state,0.01,moves)
+                else:
+
+                    action = white_player.get_action(converted_state,0.01,moves)
+                #action = white_player.get_action(converted_state,0.1,moves)
 
 
             env.step(action)
@@ -315,7 +326,7 @@ def play_training_tournament(models: list, env: chess_v6, matches_per_opponent: 
 
             print(f'Stats after round {round}: wins = {wins} with {illegals} illegal move timeouts, average number of moves per win = {avg_moves}, average reward per move = {avg_rewards} ')
             
-            info_for_round = f'Model = {model_to_train.__class__.__name__}, Round = {round}, won {wins} games out of {total_number_of_games}, average number of moves per win in this round = {avg_moves}, average reward per move in this round= {avg_rewards} '
+            info_for_round = f'Model = {model_to_train.__class__.__name__}, Round = {round + 1}, won {wins} games out of {total_number_of_games}, average number of moves per win in this round = {avg_moves}, average reward per move in this round= {avg_rewards} '
 
             add_to_logs(logs_file_name,info_for_round)
 
@@ -510,7 +521,7 @@ def _play_tournament_round(model_to_train: Model, opponents: list, env: chess_v6
 
 
 def play_training_tournament_with_2_agents(models: list, env: chess_v6, matches_per_opponent: int = 10,
-        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponent: bool = True, logs_file_name = 'logs/tournament_logs_2.txt' ):
+        rounds_in_tournament: int = 5,episodes_for_target_update:int = 5, add_random_opponent: bool = True, logs_file_name = 'logs/tournament_logs_2.txt', save_models_interval = 5 ) -> (list,dict):
     
 
     """
@@ -531,9 +542,9 @@ def play_training_tournament_with_2_agents(models: list, env: chess_v6, matches_
        
         models = updated_models
 
-        if (round + 1) % 5 == 0:
+        if (round + 1) % save_models_interval == 0:
                 for model in models:
-                    model.save_full_model('agent', round + 21)
+                    model.save_full_model(round + 21)
 
             
     return models, data
