@@ -53,6 +53,7 @@ avg_rewards = []
 zeros = tf.zeros((1,8,8,111), dtype=float32)
 
 start = time.time()
+
 """
 dqn.model.predict(zeros)
 ddqn.model.predict(zeros)
@@ -64,11 +65,17 @@ dqn.save_full_model(1)
 ddqn.save_full_model(1)
 dueling.save_full_model(1)
 ppo.save_full_model(1)
+
 dqn.load_full_model('dqn_model_1')
 ddqn.load_full_model('ddqn_model_1')
 dueling.load_full_model('duelingdqn_model_1')
 ppo.load_full_models('ppo_actor_1',)
 """
+
+dqn.save_full_model(1)
+ddqn.save_full_model(1)
+dueling.save_full_model(1)
+ppo.save_full_model(1)
 
 models = [dqn,ddqn,dueling,ppo]
 

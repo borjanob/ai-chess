@@ -160,10 +160,10 @@ class PPO:
 
     def save_full_model(self, episode, save_critic = True):
 
-        self.actor.save(f'ppo_actor_{episode}')
+        self.actor.save(f'ppo_actor_{episode}.h5')
 
         if save_critic:
-            self.critic.save(f'ppo_critic_{episode}')
+            self.critic.save(f'ppo_critic_{episode}.h5')
 
     def load_full_models(self, path_to_actor, critic_path = ''):
 

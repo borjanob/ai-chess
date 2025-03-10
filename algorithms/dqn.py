@@ -134,7 +134,7 @@ class DQN:
         self.model.save_weights(f'dqn_{model_name}_{episode}.weights.h5')
 
     def save_full_model(self, episode):
-        self.model.save(f'dqn_model_{episode}')
+        self.model.save(f'dqn_model_{episode}.h5')
 
     def train(self):
         """

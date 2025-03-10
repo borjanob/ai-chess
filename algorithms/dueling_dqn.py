@@ -161,7 +161,7 @@ class DuelingDQN:
         self.model = load_model(path)
 
     def save_full_model(self, episode):
-        self.model.save(f'duelingdqn_model_{episode}')
+        self.model.save(f'duelingdqn_model_{episode}.h5')
 
     def train(self):
         """
