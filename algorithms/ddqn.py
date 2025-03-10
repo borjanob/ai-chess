@@ -126,7 +126,7 @@ class DDQN:
 
 
     def save_full_model(self, episode):
-        self.model.save(f'ddqn_model_{episode}', save_format = 'tf')
+        self.model.save(f'ddqn_model_{episode}')
 
     def save(self, model_name, episode):
         """
