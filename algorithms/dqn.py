@@ -4,6 +4,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 from tensorflow import float32
 import tensorflow as tf
+from model.agent import Agent
 #tf.keras.models.load_model('my_model.keras')
 
 class DQN:

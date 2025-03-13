@@ -4,8 +4,8 @@ from tensorflow.keras.models import Sequential
 
 
 class Critic(tf.keras.Model):
-    def __init__(self, input_shape: int, num_of_hidden_units = 128):
-        super(Critic, self).__init__()
+    def __init__(self, input_shape: int, num_of_hidden_units = 128, **kwargs):
+        super(Critic, self).__init__(**kwargs)
 
         self.input_shp = input_shape
         self.num_of_hidden_units = num_of_hidden_units

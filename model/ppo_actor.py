@@ -5,8 +5,8 @@ from tensorflow.keras.models import Sequential
 
 
 class Actor(tf.keras.Model):
-    def __init__(self, input_shape: int, num_of_actions, num_of_hidden_units = 128):
-        super(Actor, self).__init__()
+    def __init__(self, input_shape: int, num_of_actions, num_of_hidden_units = 128, **kwargs):
+        super(Actor, self).__init__(**kwargs)
 
         self.input_shp = input_shape
 

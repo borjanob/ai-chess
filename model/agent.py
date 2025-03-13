@@ -14,8 +14,8 @@ class Agent(Model):
     number_of_hidden_units: the number of hidden units in the neural net
     """
 
-    def __init__(self,number_of_outputs: int,number_of_hidden_units: int):
-        super(Agent,self).__init__()
+    def __init__(self,number_of_outputs: int,number_of_hidden_units: int, **kwargs):
+        super(Agent,self).__init__(**kwargs)
 
         self.number_of_outputs = number_of_outputs
 
@@ -72,4 +72,5 @@ class Agent(Model):
             "number_of_outputs": self.number_of_outputs,
             "number_of_hidden_units" :self.number_of_hidden_units
         }
+        
         return {**base_config, **config} 
