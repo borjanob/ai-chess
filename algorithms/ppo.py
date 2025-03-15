@@ -167,10 +167,10 @@ class PPO:
 
     def load_full_models(self, path_to_actor, critic_path = ''):
 
-        self.actor = load_model(path_to_actor)
+        self.actor = load_model(path_to_actor, custom_objects = {'Actor':Actor})
 
         if critic_path != '':
-            self.critic = load_model(critic_path)
+            self.critic = load_model(critic_path, custom_objects = {'Critic':Critic})
 
 
     def train_step(self, states, actions, old_logprobs, advantages, returns):

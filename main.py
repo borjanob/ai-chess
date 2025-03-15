@@ -49,15 +49,25 @@ wins = dict()
 matches_played = 0
 illegal_moves = 0
 avg_rewards = []
-dqn.save_full_model(1)
-ddqn.save_full_model(1)
-dueling.save_full_model(1)
-ppo.save_full_model(1)
+
+
+zeros = tf.zeros((1,8,8,111), dtype = float32)
+
+dqn.model.predict(zeros)
+ddqn.model.predict(zeros)
+dueling.model.predict(zeros)
+ppo.actor.predict(zeros)
+ppo.critic.predict(zeros)
+
+dqn.load_full_model('dqn_model_15.h5')
+ddqn.load_full_model('ddqn_model_15.h5')
+dueling.load_full_model('duelingdqn_model_15.h5')
+ppo.load_full_models('ppo_actor_15.h5', 'ppo_critic_15.h5')
 
 models = [dqn,ddqn,dueling,ppo]
 
 new_models, _ = play_training_tournament(models,env,matches_per_opponent=16,rounds_in_tournament=20,episodes_for_target_update=2,save_models_time=5)
-trained,_ = play_training_tournament_with_2_agents(new_models, env,matches_per_opponent=16,rounds_in_tournament=20,episodes_for_target_update=2,save_models_interval=5)
+trained,_ = play_training_tournament_with_2_agents(new_models, env,matches_per_opponent=16,rounds_in_tournament=15,episodes_for_target_update=2,save_models_interval=5)
 
 
 for i in range(len(trained)):

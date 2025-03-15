@@ -4,6 +4,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 from tensorflow import float32
 import tensorflow as tf
+from model.agent import Agent
 
 class DDQN:
     def __init__(self, state_space_shape, num_actions, model, target_model, learning_rate=0.1,
@@ -122,7 +123,7 @@ class DDQN:
 
     def load_full_model(self, path_to_model):
 
-        self.model = load_model(path_to_model)
+        self.model = load_model(path_to_model, custom_objects = {'Agent':Agent})
 
 
     def save_full_model(self, episode):

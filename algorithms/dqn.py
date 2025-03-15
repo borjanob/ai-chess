@@ -107,7 +107,7 @@ class DQN:
 
     def load_full_model(self, path_to_model):
 
-        self.model = load_model(path_to_model)
+        self.model = load_model(path_to_model, custom_objects = {'Agent':Agent})
 
 
     def load_weights(self, path_to_weights, update_target_model = True):
@@ -119,7 +119,7 @@ class DQN:
         zeros = tf.zeros((1,8,8,111), dtype=float32)
         self.model.predict(zeros)
 
-        self.model.load_weights(path_to_weights)
+        self.model.load_weights(path_to_weights, custom_objects = {'Agent':Agent})
 
         if update_target_model:
             # initialize weights for target model
